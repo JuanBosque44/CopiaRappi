@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Vendor } from './entities/vendors/vendors.entity';
+import { Product } from 'src/products/entities/products/products.entity';
 import { CreateVendorDto } from './entities/dto/create-vendor.dto';
 import { UpdateVendorDto } from './entities/dto/update-vendor.dto';
-import { InternalServerErrorException } from '@nestjs/common';
 import { IServiceInterface } from 'src/shared/interfaces/service.interface';
 import { PaginatedResult } from 'src/shared/interfaces/paginatedResult.type';
 import { paginate } from 'src/shared/utils/pagination';
@@ -16,11 +16,17 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
   constructor(
     @InjectRepository(Vendor)
     private readonly vendorsRepository: Repository<Vendor>,
+
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
   ) {}
 
   async findAll(options: {page?: number; limit?: number; [key: string]: any} = {} ): Promise<Vendor[] | PaginatedResult<Vendor> | VendorResponseDto[] | PaginatedResult<VendorResponseDto>> {
+    const relations = ['reviews', 'products'];
 
-    const relations = ['product']
+    if (options.page && options.limit) {
+      return paginate(this.vendorsRepository, options.page, options.limit, { relations });
+    }
 
     if(options.page && options.limit) {
       const paginated = await paginate(this.vendorsRepository, options.page, options.limit, {relations})
@@ -35,10 +41,14 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
     return plainToInstance(VendorResponseDto, vendor, { excludeExtraneousValues: true})
   }
 
+  // Obtener un vendor por id con sus productos y reviews
   async findOne(id: number): Promise<Vendor> {
-    const vendor = await this.vendorsRepository.findOne({ where: { id }, relations: ['product', 'reviews'] });
+    const vendor = await this.vendorsRepository.findOne({
+      where: { id },
+      relations: ['products', 'reviews'],
+    });
     if (!vendor) {
-      throw new NotFoundException(`Vendedor no encontrado`);
+      throw new NotFoundException(`Vendedor con id ${id} no encontrado`);
     }
     return vendor;
   }
@@ -76,5 +86,15 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
       .where('vendor.shopName = :nombre', { nombre })
       .getMany();
   }
-  
+
+  async getProducts(vendorId: number): Promise<Product[]> {
+    return this.productRepository.find({ where: { vendor: { id: vendorId } } });
+  }
+
+  getStatistics(vendorId: number) {
+    return {
+      totalProducts: 10, // ejemplo fijo, luego lo calculas dinámicamente
+      totalSales: 2500,  // ejemplo fijo
+    };
+  }
 }

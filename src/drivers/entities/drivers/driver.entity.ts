@@ -28,9 +28,7 @@ export enum VehicleType {
 
 @Entity('drivers') 
 export class Driver {
-   
-  // CAMPOS IDENTIFICADORES
-  
+     
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -48,7 +46,7 @@ export class Driver {
   phone: string;
 
   @Column({ nullable: true })
-  photo: string; 
+  photo?: string; 
 
   // INFORMACIÓN DEL VEHÍCULO
   

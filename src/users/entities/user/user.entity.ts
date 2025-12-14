@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, ManyToMany, JoinTable, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinTable, OneToOne, ManyToMany, JoinColumn } from 'typeorm';
 import { Address } from './address.entity';
 import { Order } from '../../../orders/entities/orders/orders.entity';
 import { Vendor } from 'src/vendors/entities/vendors/vendors.entity';
@@ -8,11 +8,11 @@ import { Review } from 'src/review/entities/review.entity';
 import { Support } from 'src/support/entities/support.entity';
 import { Payment } from 'src/payments/payments/entities/payment.entity';
 
-export enum UserRole{
-  ADMIN='ADMIN',
-  VENDOR='VENDOR',
-  CLIENT='CLIENT',
-  DRIVER='DRIVER'
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  VENDOR = 'VENDOR',
+  CLIENT = 'CLIENT',
+  DRIVER = 'DRIVER',
 }
 
 @Entity()
@@ -35,7 +35,7 @@ export class User {
   @Column({ nullable: true })
   addressId: number;
 
-  @ManyToOne(() => Address, (address) => address.users , { eager: true })
+  @ManyToOne(() => Address, (address) => address.users, { eager: true })
   @JoinColumn({ name: 'addressId' })
   address: Address;
 
@@ -54,42 +54,42 @@ export class User {
   favoriteVendors: Vendor[];
 
   @Column({
-    type:'enum',
+    type: 'enum',
     enum: UserRole,
     default: UserRole.CLIENT,
   })
   role: UserRole;
 
   @Column({ nullable: true })
-  vendorProfileId?: number
+  vendorProfileId?: number;
 
-  @OneToOne(() => Vendor, (vendor) => vendor.user, { nullable: true } )
-  @JoinColumn({ name: 'vendorProfile'})
-  vendorProfile?: Vendor
+  @OneToOne(() => Vendor, (vendor) => vendor.user, { nullable: true, eager: true })
+  @JoinColumn({ name: 'vendorProfileId' })
+  vendorProfile?: Vendor;
 
   @Column({ nullable: true })
-  driverProfileId?: number
+  driverProfileId?: number;
 
   @OneToOne(() => Driver, (driver) => driver.user, { nullable: true })
-  @JoinColumn({ name: 'driverProfile'})
-  driverProfile?: Driver
+  @JoinColumn({ name: 'driverProfile' })
+  driverProfile?: Driver;
 
   @Column({ nullable: true })
-  backOfficeProfileId?: number
+  backOfficeProfileId?: number;
 
-  @OneToOne(()=> Admin, (admin) => admin.user, { nullable: true })
-  @JoinColumn({ name: 'backOfficeProfile'})
-  backOfficeProfile?: Admin
+  @OneToOne(() => Admin, (admin) => admin.user, { nullable: true })
+  @JoinColumn({ name: 'backOfficeProfile' })
+  backOfficeProfile?: Admin;
 
   @OneToMany(() => Support, (support) => support.user, { nullable: true })
-  @JoinColumn({ name: 'supportRequests'})
+  @JoinColumn({ name: 'supportRequests' })
   supportRequest?: Support;
 
   @OneToMany(() => Support, (support) => support.targetUser, { nullable: true })
   @JoinColumn({ name: 'messages' })
   supportResponse?: Support;
 
-  @OneToMany(() => Payment, payment => payment.user)
-  @JoinColumn({ name: 'payment'})
+  @OneToMany(() => Payment, (payment) => payment.user)
+  @JoinColumn({ name: 'payment' })
   payments: Payment[];
 }

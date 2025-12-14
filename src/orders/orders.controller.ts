@@ -30,7 +30,7 @@ export class OrdersController {
     }
 
     @Put(':id')
-    @Roles(UserRole.CLIENT, UserRole.ADMIN)
+    @Roles(UserRole.CLIENT, UserRole.ADMIN, UserRole.VENDOR)
     update(@Param('id') id: string, @Body() body: UpdateOrderDto) {
         if(!validateParameters(id)) throw new InternalServerErrorException('Parametros inválidos')
         return this.ordersService.update(+id, body);

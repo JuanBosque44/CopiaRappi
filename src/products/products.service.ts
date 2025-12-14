@@ -15,28 +15,29 @@ import { FilterProductDto } from './entities/dto/filter-product.dto';
 
 @Injectable()
 export class ProductsService implements IServiceInterface<Product, CreateProductDto, UpdateProductDto, ProductRequestDto> {
-    constructor(
-        @InjectRepository(Product)
-        private readonly productRepository: Repository<Product>,
-        @InjectRepository(Category)
-        private readonly categoryRepository: Repository<Category>,
+	constructor(
+		@InjectRepository(Product)
+		private readonly productRepository: Repository<Product>,
+		@InjectRepository(Category)
+		private readonly categoryRepository: Repository<Category>,
+		private readonly vendorService: VendorsService
+	) {}
 
-        private readonly vendorService: VendorsService,
+	async create(data: CreateProductDto): Promise<Product> {
+		const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+		const vendor = await this.vendorService.findOne(data.vendorId);
 
-    ){}
+		if (!category || !vendor) {
+			throw new NotFoundException('El vendedor o la categoría del producto no existe');
+		}
 
-    async create(data: CreateProductDto): Promise<Product> {
-        const category = await this.categoryRepository.findOne({where:{id: data.categoryId}})
-        const vendor = await this.vendorService.findOne(data.vendorId)
-        if(!category || !vendor){
-            throw new NotFoundException('El vendedor o la categoria del producto no existe')
-        }
-        const product = this.productRepository.create(data)
-        product.category = category
-        product.vendor = vendor
-        return this.productRepository.save(product)
-    }
+		const product = this.productRepository.create(data);
+		product.category = category;
+		product.vendor = vendor;
 
+		return this.productRepository.save(product);
+	}
+		
     async findAll(options: {page?: number; limit?: number; [key: string]: any} = {}, dtoFilter?: FilterProductDto ): Promise<ProductRequestDto[] | PaginatedResult<ProductRequestDto>> {
         const relations = ['category'];
         const where: any = {};
@@ -63,15 +64,24 @@ export class ProductsService implements IServiceInterface<Product, CreateProduct
         return plainToInstance(ProductRequestDto, product, {excludeExtraneousValues:true})
     }
 
-    async update(id: number, data: UpdateProductDto): Promise<Product> {
-        const existing = await this.productRepository.findOne({ where: { id } });
-        if (!existing) throw new NotFoundException('Producto no encontrado');
+	async update(id: number, data: UpdateProductDto): Promise<Product> {
+		const product = await this.productRepository.findOne({ where: { id }, relations: ['category', 'vendor'] });
+		if (!product) throw new NotFoundException('Producto no encontrado');
 
-        await this.productRepository.update(id, data);
-        return this.findOne(id) as Promise<Product>;
-    }
+		// Actualiza categoría si se envía categoryId
+		if (data.categoryId) {
+			const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+			if (!category) throw new NotFoundException('Categoría no encontrada');
+			product.category = category;
+		}
 
-    delete(id: number): Promise<any> {
-        return this.productRepository.delete(id)
-    }
+		delete data.vendorId; // nunca permitimos cambiar el vendor
+		Object.assign(product, data);
+
+		return this.productRepository.save(product);
+	}
+
+	async delete(id: number): Promise<void> {
+		await this.productRepository.delete(id);
+	}
 }

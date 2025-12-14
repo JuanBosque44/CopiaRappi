@@ -53,7 +53,7 @@ export class Order {
   @JoinTable({name: 'list_of_products', joinColumn: {name: 'orderId', referencedColumnName: 'id'}, inverseJoinColumn: {name: 'productId', referencedColumnName: 'id'}})
   items: OrderItem[];
 
-  @ManyToOne(() => Vendor, (vendor) => vendor.order)
+  @ManyToOne(() => Vendor, (vendor) => vendor.orders)
   vendor: Vendor;
 
   @Column({ nullable: true })

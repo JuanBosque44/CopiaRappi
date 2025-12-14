@@ -9,7 +9,7 @@ export class Vendor {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({default: 'Sin nombre'})
+  @Column({ default: 'Sin nombre' })
   shopName: string;
 
   @ManyToMany(() => User, (user) => user.favoriteVendors)
@@ -25,9 +25,9 @@ export class Vendor {
   reviews: Review[];
 
   @OneToMany(() => Product, (product) => product.vendor)
-  product: Product[];
+  products: Product[];
 
   @OneToMany(() => Order, (order) => order.vendor)
   @JoinColumn({ name: 'orders' })
-  order: Order[];
+  orders: Order[];
 }

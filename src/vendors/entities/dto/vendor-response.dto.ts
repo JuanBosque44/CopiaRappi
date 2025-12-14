@@ -3,6 +3,10 @@ import { ProductRequestDto } from "src/products/entities/dto/product-request.dto
 
 
 export class VendorResponseDto{
+
+    @Expose()
+    id: number;
+
     @Expose()
     shopName: string
 

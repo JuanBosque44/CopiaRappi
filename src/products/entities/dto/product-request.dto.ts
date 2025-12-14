@@ -1,5 +1,6 @@
 import { Expose, Type } from "class-transformer";
 import { CategoryRequestDto } from "./category-request.dto";
+import { VendorResponseDto } from "src/vendors/entities/dto/vendor-response.dto";
 
 
 export class ProductRequestDto{
@@ -21,4 +22,8 @@ export class ProductRequestDto{
 
     @Expose()
     price: number
+
+    @Expose()
+    @Type(() => VendorResponseDto)
+    vendor: VendorResponseDto;
 }
