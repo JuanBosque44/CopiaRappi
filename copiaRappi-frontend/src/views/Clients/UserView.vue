@@ -1,7 +1,6 @@
 <template>
   <div class="user-container">
-    <h2>User View</h2>
-    <p>Solo usuarios normales o admins pueden ver esto.</p>
+    
 
     <div v-if="loading">Cargando órdenes...</div>
 
@@ -44,7 +43,7 @@
           {{ item.name }} - {{ item.quantity }} x {{ item.price }}$
         </li>
       </ul>
-      <p>Total: {{ cartTotal }}$</p>
+      <p>Total: ${{ cartTotal }}</p>
       <button @click="checkout">Finalizar compra</button>
     </div>
 
@@ -60,10 +59,7 @@
       </div>
     </div>
     
-    <!-- Si no hay órdenes -->
-    <div v-else>
-      <p>No tienes órdenes actualmente.</p>
-    </div>
+    
 
     <!-- Error en carga -->
     <div v-if="error" class="error-message">
@@ -74,7 +70,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useUserStore } from '../store';
+import { useUserStore } from '../../store';
 import axios from 'axios';
 
 const userStore = useUserStore();
@@ -122,25 +118,39 @@ const searchRestaurants = async () => {
     return;
   }
 
-  // Limpiar y formatear el nombre ingresado por el usuario
-  const cleanedQuery = searchQuery.value.trim().toLowerCase();  // Limpiar y pasar a minúsculas
+  const cleanedQuery = searchQuery.value.trim();  
   console.log("Buscando restaurante:", cleanedQuery);
 
   try {
     // Cambiar la URL para apuntar al endpoint correcto
     const { data } = await axios.get(
-      `http://localhost:3000/vendors`,  // Cambiar "restaurants" por "vendors"
+      `http://localhost:3000/vendors/name/` + cleanedQuery,  
       {
         headers: { Authorization: `Bearer ${userStore.token}` },
       }
     );
     searchResults.value = data;
   } catch (err) {
-    console.error('Error buscando restaurantes:', err);
+    console.error('Error al buscar restaurantes: ', err);
     error.value = 'No se pudo realizar la búsqueda. Intenta nuevamente.';
   }
 };
 
+
+const fetchRestaurants = async () => {
+  try {
+    const { data } = await axios.get(
+      'http://localhost:3000/vendors',
+      {
+        headers: { Authorization: `Bearer ${userStore.token}` },
+      }
+    );
+    searchResults.value = data || [];
+  } catch (err) {
+    console.error('Error al buscar restaurantes:', err);
+    error.value = 'No se pudieron cargar los restaurantes. Intenta nuevamente.';
+  }
+};
 
 // Función para seleccionar un restaurante y ver su menú
 const selectRestaurant = (restaurant) => {
@@ -196,9 +206,9 @@ const toggleFavoriteVendor = async (vendorId) => {
   }
 };
 
-// Obtener las órdenes al montar el componente
 onMounted(() => {
   fetchOrders();
+  fetchRestaurants();
 });
 </script>
 

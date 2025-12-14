@@ -61,10 +61,10 @@
     <li v-for="o in orders" :key="o.id">
       Pedido #{{ o.id }} - {{ o.status }} - ${{ Number(o.total).toFixed(2) }}
       <button @click="viewOrderDetails(o.id)">Ver detalles</button>
-      <select v-model="o.status" @change="changeOrderStatus(o.id, o.status)">
+      <select v-model="o.status" @change="changeOrderStatus(o.id, o.status)" style="margin-left: 1.2%;">
         <option value="PENDING">Pendiente</option>
         <option value="IN_PROGRESS">En progreso</option>
-        <option value="COMPLETED">Compleztado</option>
+        <option value="COMPLETED">Completado</option>
         <option value="CANCELLED">Cancelado</option>
       </select>
     </li>
@@ -107,7 +107,7 @@
         </select>
         <textarea v-model="supportMessage" placeholder="Escribe tu mensaje" required></textarea>
         <button @click="createSupportTicket" :disabled="loadingSupport">
-          {{ loadingSupport ? 'Enviando...' : 'Enviar ticket' }}
+          {{ loadingSupport ? 'Enviando...' : 'Enviar' }}
         </button>
         <p v-if="supportSuccess" class="success">{{ supportSuccess }}</p>
         <p v-if="supportError" class="error">{{ supportError }}</p>
@@ -118,7 +118,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { useUserStore } from '../store';
+import { useUserStore } from '../../store';
 import axios from 'axios';
 
 const userStore = useUserStore();
@@ -310,10 +310,10 @@ const createSupportTicket = async () => {
     }, authHeaders());
 
     supportMessage.value = '';
-    supportSuccess.value = 'Ticket enviado correctamente';
+    supportSuccess.value = 'Mensaje enviado correctamente';
   } catch (err) {
     console.error(err);
-    supportError.value = 'No se pudo enviar el ticket';
+    supportError.value = 'No se pudo enviar el mensaje. Intenta nuevamente.';
   } finally {
     loadingSupport.value = false;
   }

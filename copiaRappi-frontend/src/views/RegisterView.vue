@@ -9,21 +9,21 @@
       <select v-model="role" required>
         <option disabled value="">Selecciona un rol</option>
         <option value="CLIENT">Usuario</option>
-        <option value="DRIVER">Driver</option>
-        <option value="VENDOR">Vendor</option>
+        <option value="DRIVER">Conductor</option>
+        <option value="VENDOR">Vendedor</option>
         <option value="ADMIN">Admin</option>
       </select>
 
       <div v-if="role === 'DRIVER'" class="role-form">
-        <h3>Datos del Driver y Vehículo</h3>
+        <h3>Datos del conductor y vehículo</h3>
         
         <input v-model="phone" type="tel" placeholder="Teléfono (Ej: +569...)" required />
 
         <select v-model="vehicleType" required>
           <option disabled value="">Tipo de Vehículo</option>
-          <option value="MOTORCYCLE">MOTO</option>
-          <option value="BICYCLE">BICI</option>
-          <option value="CAR">AUTO</option>
+          <option value="MOTORCYCLE">Moto</option>
+          <option value="BICYCLE">Bicicleta</option>
+          <option value="CAR">Auto</option>
         </select>
         <input v-model="licensePlate" type="text" placeholder="Patente / Matrícula" required />
         <input v-model="vehicleBrand" type="text" placeholder="Marca del Vehículo (Ej: Yamaha)" />
@@ -33,7 +33,7 @@
       </div>
 
       <div v-else-if="role === 'VENDOR'" class="role-form">
-        <h3>Datos del Vendor</h3>
+        <h3>Datos del Vendedor</h3>
         <input v-model="storeName" type="text" placeholder="Nombre de la Tienda" required />
         <input v-model="storeAddress" type="text" placeholder="Dirección Principal" required />
       </div>
@@ -95,12 +95,12 @@ const validateFields = () => {
 
     // Validar que el resto de campos obligatorios del Driver estén llenos
     if (!phone.value || !vehicleType.value || !licensePlate.value || !vehicleModel.value || !driverLicense.value) {
-      errorMessage.value = 'Como Driver, debes completar todos los datos personales, del vehículo y la licencia.';
+      errorMessage.value = 'Como repartidor, debes completar todos los datos personales, del vehículo y la licencia.';
       return false;
     }
   } else if (role.value === 'VENDOR') {
     if (!storeName.value || !storeAddress.value) {
-      errorMessage.value = 'Como Vendor, debes completar el nombre y la dirección de la tienda.';
+      errorMessage.value = 'Como restaurante, debes completar el nombre y la dirección de la tienda.';
       return false;
     }
   }
@@ -158,7 +158,7 @@ if (role.value === 'DRIVER') {
     await axios.post('http://localhost:3000/auth/register', userData);
     router.replace('/login');
   } catch (err) {
-    console.error('Error registering:', err.response?.data || err);
+    console.error('Error al registrar:', err.response?.data || err);
     errorMessage.value = err.response?.data?.message || 'No se pudo registrar. Verifica los datos.';
   }
 };

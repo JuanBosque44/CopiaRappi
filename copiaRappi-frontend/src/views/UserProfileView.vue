@@ -1,32 +1,25 @@
 <template>
   <div class="profile-container">
     <h1>Mi Perfil</h1>
+    <nav style="margin-bottom: 2%;" v-if="user.role === 'CLIENT'">
+     <router-link to="/user/orders">Mis Órdenes</router-link>
+    </nav>
 
     <div v-if="user">
       <form @submit.prevent="updateProfile">
         <input v-model="name" placeholder="Nombre" required />
         <input v-model="email" type="email" placeholder="Email" required />
-        <input v-model="password" type="password" placeholder="Nueva contraseña" />
+        <!--
+          <input v-model="password" type="password" placeholder="Contraseña" />
+        -->
         <button type="submit" :disabled="loading">Actualizar Perfil</button>
       </form>
       <p v-if="profileMessage" :class="{ error: profileError }">{{ profileMessage }}</p>
 
-      <!-- Órdenes solo para no-admin -->
-      <div v-if="user.role !== 'ADMIN'">
-        <h2>Órdenes</h2>
-        <div v-if="ordersError" class="error-message">{{ ordersError }}</div>
-        <ul v-else>
-          <li v-for="order in orders" :key="order.id">
-            Orden #{{ order.id }} - {{ order.status }}
-          </li>
-        </ul>
-      </div>
-      <div v-else>
-        <p>Los administradores no tienen órdenes personales.</p>
-      </div>
 
-      <h2>Vendors Favoritos</h2>
-      <ul>
+      <ul v-if="user.role === 'CLIENT'">
+        <h2>Negocios Favoritos</h2>
+        <span v-if="favoriteVendors.length === 0" class="error-message">No hay restaurantes marcados como favoritos</span>
         <li v-for="vendor in favoriteVendors" :key="vendor.id">
           {{ vendor.name }}
           <button @click="toggleFavorite(vendor.id)" :disabled="loadingFavorites">
@@ -98,7 +91,7 @@ const updateProfile = async () => {
     userStore.user = res.data;
     localStorage.setItem('user', JSON.stringify(res.data));
 
-    profileMessage.value = 'Perfil actualizado correctamente';
+    profileMessage.value = '¡Perfil actualizado correctamente!';
   } catch (err) {
     console.error('Error al actualizar perfil:', err);
     profileMessage.value = 'No se pudo actualizar el perfil';
@@ -136,7 +129,6 @@ const logout = () => {
   margin: 2rem auto;
   padding: 1rem;
   text-align: center;
-  background: #f9f9f9;
   border-radius: 8px;
 }
 
@@ -152,19 +144,7 @@ input {
   font-size: 1rem;
 }
 
-button {
-  padding: 0.5rem;
-  font-size: 1rem;
-  background-color: #42b883;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-}
 
-button:hover:enabled {
-  background-color: #369870;
-}
 
 ul {
   list-style: none;

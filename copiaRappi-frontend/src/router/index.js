@@ -2,10 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
-import AdminView from '../views/AdminView.vue';
-import UserView from '../views/UserView.vue';
-import DriverView from '../views/DriverView.vue';
-import VendorView from '../views/VendorView.vue';
+import AdminView from '../views/Admins/AdminView.vue';
+import UserView from '../views/Clients/UserView.vue';
+import DriverView from '../views/Drivers/DriverView.vue';
+import VendorView from '../views/Vendors/VendorView.vue';
 import UserProfileView from '../views/UserProfileView.vue';
 import { useUserStore } from '../store';
 
@@ -21,12 +21,22 @@ const routes = [
     component: AdminView,
     meta: { requiresAuth: true, roles: ['ADMIN'] },
   },
+
+  //Rutas de user
   {
     path: '/user',
     name: 'user',
     component: UserView,
     meta: { requiresAuth: true, roles: ['CLIENT', 'ADMIN'] },
   },
+  {
+    path: '/user/orders',
+    name: 'user-orders',
+    component: () => import('../views/Clients/UserOrdersView.vue'),
+    meta: { requiresAuth: true, roles: ['CLIENT', 'VENDOR', 'DRIVER'] },
+  },
+
+
   {
     path: '/driver',
     name: 'driver',

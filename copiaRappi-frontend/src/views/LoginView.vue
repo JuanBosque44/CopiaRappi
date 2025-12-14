@@ -6,6 +6,7 @@
       <input v-model="password" type="password" placeholder="Contraseña" required />
       <button type="submit">Ingresar</button>
     </form>
+    <p>¿No tienes una cuenta registrada? <a href="/register">Crea tu cuenta</a></p>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
   </div>
 </template>
@@ -30,21 +31,21 @@ const handleLogin = async () => {
     // Redirige según el rol del usuario
     let path = '/';
     switch (userStore.user.role) {
-      case 'admin':
+      case 'ADMIN':
         path = '/admin';
         break;
-      case 'user':
+      case 'CLIENT':
         path = '/user';
         break;
-      case 'driver':
+      case 'DRIVER':
         path = '/driver';
         break;
-      case 'vendor':
+      case 'VENDOR':
         path = '/vendor';
         break;
     }
 
-    router.replace(path); // 🔹 reemplaza la ruta actual sin necesidad de recargar
+    router.replace(path); 
   } catch (err) {
     console.error(err);
     errorMessage.value = 'Email o contraseña incorrectos';

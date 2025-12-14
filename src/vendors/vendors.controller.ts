@@ -50,19 +50,24 @@ export class VendorsController {
     return this.vendorsService.delete(+id);
   }
 
+  @Get('name/:name')
+  @Public()
+  getVendorByName(@Param('name') name: string) {
+    return this.vendorsService.findByVendorName(name);
+  }
 
 
   @Get(':id/products')
-@Public()
-getVendorProducts(@Param('id') id: string) {
-  return this.vendorsService.getProducts(+id);
-}
+  @Public()
+  getVendorProducts(@Param('id') id: string) {
+    return this.vendorsService.getProducts(+id);
+  }
 
 
 
-@Get(':id/statistics')
-@Public()
-getVendorStatistics(@Param('id') id: string) {
-  return this.vendorsService.getStatistics(+id);
-}
+  @Get(':id/statistics')
+  @Public()
+  getVendorStatistics(@Param('id') id: string) {
+    return this.vendorsService.getStatistics(+id);
+  }
 }

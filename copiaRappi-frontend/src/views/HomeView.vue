@@ -1,6 +1,5 @@
 <template>
   <div class="home-container">
-    <h1>Bienvenido a CopiaRappi</h1>
 
     <div v-if="user">
       <p>Hola, {{ user.name }}! Tu rol es: {{ user.role }}</p>
