@@ -42,6 +42,20 @@ export class UserController {
         return user? user : 'No se ha encontrado al usuario.'
     }
 
+    @Get(':id/favorites')
+    @Roles(UserRole.CLIENT)
+    async getFavoriteVendors(@Param('id') id: string, @Request() req) {
+        if(!validateParameters(id)) throw new InternalServerErrorException('Parametros inválidos')
+        const userId = req.user.id
+        if (userId !== +id){
+            throw new ForbiddenException('No puedes obtener los favoritos de este usuario')
+        }
+        const body = {
+            id: +id,
+        }
+        return this.usersService.findClient(body)
+    }
+
     @Put(':id')
     @Roles(UserRole.CLIENT, UserRole.ADMIN, UserRole.DRIVER, UserRole.VENDOR) 
     update(@Param('id') id: string, @Body() body: UpdateUserDto, @Request() req) {

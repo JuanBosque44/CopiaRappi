@@ -12,6 +12,7 @@
         <!--
           <input v-model="password" type="password" placeholder="Contraseña" />
         -->
+        <input v-model="address" type="text" placeholder="Dirección">
         <button type="submit" :disabled="loading">Actualizar Perfil</button>
       </form>
       <p v-if="profileMessage" :class="{ error: profileError }">{{ profileMessage }}</p>
@@ -21,9 +22,9 @@
         <h2>Negocios Favoritos</h2>
         <span v-if="favoriteVendors.length === 0" class="error-message">No hay restaurantes marcados como favoritos</span>
         <li v-for="vendor in favoriteVendors" :key="vendor.id">
-          {{ vendor.name }}
+          {{ vendor.shopName }}
           <button @click="toggleFavorite(vendor.id)" :disabled="loadingFavorites">
-            {{ vendor.isFavorite ? 'Quitar' : 'Agregar' }}
+            {{ vendor.isFavorite ? 'Agregar' : 'Quitar' }}
           </button>
         </li>
       </ul>
@@ -49,6 +50,7 @@ const router = useRouter();
 const user = computed(() => userStore.user);
 const name = ref(user.value?.name || '');
 const email = ref(user.value?.email || '');
+const address = ref(user.value?.address || '');
 const password = ref('');
 
 const orders = ref([]);
@@ -75,7 +77,7 @@ onMounted(async () => {
     }
   }
 
-  favoriteVendors.value = (user.value.favorites || []).map(v => ({ ...v, isFavorite: true }));
+  fetchFavoriteVendors();
 });
 
 const updateProfile = async () => {
@@ -85,7 +87,6 @@ const updateProfile = async () => {
 
   try {
     const body = { name: name.value, email: email.value };
-    if (password.value) body.password = password.value;
 
     const res = await axios.put(`http://localhost:3000/user/${user.value.id}`, body, authHeaders());
     userStore.user = res.data;
@@ -114,6 +115,15 @@ const toggleFavorite = async (vendorId) => {
     alert('No se pudo actualizar el favorito');
   } finally {
     loadingFavorites.value = false;
+  }
+};
+
+const fetchFavoriteVendors = async () => {
+  try {
+    const res = await axios.get(`http://localhost:3000/user/${user.value.id}/favorites`, authHeaders());
+    favoriteVendors.value = res.data.favoriteVendors;
+  } catch (err) {
+    console.error('Error al cargar restaurantes favoritos:', err);
   }
 };
 

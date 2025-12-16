@@ -12,12 +12,12 @@
         placeholder="Buscar restaurante por nombre o categoría"
         @input="searchRestaurants"
       />
-      <div v-if="searchResults.length > 0">
-        <ul>
-          <li v-for="restaurant in searchResults" :key="restaurant.id">
-            {{ restaurant.name }} - {{ restaurant.category }}
-          </li>
-        </ul>
+      <div v-if="searchResults.length > 0" class="vendors-grid">
+        <div v-for="restaurant in searchResults" :key="restaurant.id">
+          <div v-if="restaurant.shopName !== 'sin nombre'">
+            <VendorCard :vendor="restaurant"></VendorCard>
+          </div>
+        </div>
       </div>
       <div v-else>
         <p>No se encontraron restaurantes.</p>
@@ -72,6 +72,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../../store';
 import axios from 'axios';
+import VendorCard from '../../components/VendorCard.vue';
 
 const userStore = useUserStore();
 const orders = ref([]);
@@ -114,7 +115,7 @@ const fetchOrders = async () => {
 // Función para buscar restaurantes
 const searchRestaurants = async () => {
   if (!searchQuery.value) {
-    searchResults.value = [];
+    fetchRestaurants();
     return;
   }
 
@@ -192,19 +193,7 @@ const checkout = async () => {
 };
 
 // Función para marcar restaurantes como favoritos
-const toggleFavoriteVendor = async (vendorId) => {
-  try {
-    await axios.post(
-      `http://localhost:3000/user/${user.value.id}/favorite-vendor/${vendorId}`,
-      {},
-      { headers: { Authorization: `Bearer ${userStore.token}` } }
-    );
-    // Aquí podrías actualizar la lista de restaurantes favoritos en el estado del usuario
-  } catch (err) {
-    console.error('Error al marcar restaurante como favorito:', err);
-    error.value = 'No se pudo marcar el restaurante como favorito.';
-  }
-};
+
 
 onMounted(() => {
   fetchOrders();
@@ -238,4 +227,11 @@ button {
   padding: 0.5rem 1rem;
   margin-top: 0.5rem;
 }
+
+.vendors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
 </style>

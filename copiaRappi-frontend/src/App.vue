@@ -3,7 +3,7 @@
     <header>
       <h1>CopiaRappi</h1>
       <nav>
-  <router-link to="/user">Home</router-link>
+  <router-link to="/">Home</router-link>
   <router-link to="/login">Login</router-link>
   <router-link to="/register" v-if="!user">Registro</router-link> 
   <router-link to="/profile" v-if="user">Mi Perfil</router-link>

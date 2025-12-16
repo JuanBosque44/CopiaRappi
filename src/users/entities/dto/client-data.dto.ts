@@ -1,5 +1,5 @@
 import { UserRole } from '../user/user.entity';
-import { IsEnum, IsNumber } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional } from 'class-validator';
 
 export class ClientDataDto {
 
@@ -7,5 +7,6 @@ export class ClientDataDto {
     id: number;
 
     @IsEnum(UserRole, { message: 'role must be one of ADMIN, VENDOR, CLIENT, DRIVER' })
-    role: UserRole.CLIENT;
+    @IsOptional()
+    role?: UserRole.CLIENT;
 }

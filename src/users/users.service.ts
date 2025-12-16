@@ -70,7 +70,6 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
       const user = await this.userRepository.findOne({
           where: { email: email },
       });
-      if(!user) throw new NotFoundException('No se ha encontrado a un usuario con el email enviado')
       return user
 
   }
@@ -262,10 +261,7 @@ async toggleFavoriteVendor(userId: number, vendorId: number) {
       .add(vendor);
   }
 
-  return this.userRepository.findOne({
-    where: { id: userId },
-    relations: ['favoriteVendors'],
-  });
+  return isFavorite
 }
 
   async delete(id: number): Promise<any> {
