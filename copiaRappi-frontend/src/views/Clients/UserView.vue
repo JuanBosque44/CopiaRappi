@@ -192,7 +192,6 @@ const checkout = async () => {
   }
 };
 
-// Función para marcar restaurantes como favoritos
 
 
 onMounted(() => {

@@ -2,7 +2,7 @@
   <div class="home-container">
 
     <div v-if="user">
-      <p>Hola, {{ user.name }}! Tu rol es: {{ user.role }}</p>
+      <p>Hola, {{ user.name }}!</p>
 
       <nav>
         <router-link to="/profile">Mi Perfil</router-link>

@@ -1,7 +1,6 @@
 import { Expose, Type } from "class-transformer";
 import { ProductRequestDto } from "src/products/entities/dto/product-request.dto";
-import { Review } from "src/review/entities/review.entity";
-
+import { ResponseReviewDto } from "src/review/dto/response-review.dto";
 
 export class VendorResponseDto{
 
@@ -16,7 +15,7 @@ export class VendorResponseDto{
     product: ProductRequestDto[]
 
     @Expose()
-    @Type(() => Review)
-    reviews: Review[]
+    @Type(() => ResponseReviewDto)
+    reviews: ResponseReviewDto[]
 
 }
