@@ -50,6 +50,7 @@ const submitReview = async () => {
         error.value = null;
         rating.value = 0;
         comment.value = '';
+        vendorsData.value.reviews.push(data.data);
     }
     catch(Error){
         console.log('Error al enviar la reseña: '+ Error)
@@ -64,6 +65,18 @@ const validateReview = () => {
     }
     error.value = null;
     return true;
+};
+
+const deleteReview = async (reviewId) => {
+    try {
+        await axios.delete(`http://localhost:3000/reviews/${reviewId}`, {
+            headers: { Authorization: `Bearer ${userStore.token}` },
+        });
+        // Actualizar la lista de reseñas después de eliminar
+        vendorsData.value.reviews = vendorsData.value.reviews.filter(review => review.id !== reviewId);
+    } catch (err) {
+        console.error('Error al eliminar la reseña:', err);
+    }
 };
     
 </script>
@@ -109,6 +122,8 @@ const validateReview = () => {
         <h3>Otras Reseñas:</h3>
         <div v-if="vendorsData.reviews && vendorsData.reviews.length > 0">
             <div v-for="review in vendorsData.reviews" :key="review.id" class="review-card">
+                <span class="deleteComment" v-if="review.user.id === userStore.user.id || userStore.user.role === 'ADMIN'"
+                @click="deleteReview(review.id)">x</span>
                 <p>{{ review.user.name }}</p>
                 <p>Calificación: {{ review.rating }} ★</p>
                 <p>Comentario: {{ review.comment }}</p>
@@ -160,6 +175,12 @@ other-reviews {
 }
 .review {
     margin-top: 1rem;
+}
+
+.deleteComment {
+    float: right;
+    cursor: pointer;
+    color: lightgray;
 }
 
 </style>

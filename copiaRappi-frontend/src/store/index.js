@@ -3,9 +3,13 @@ import axios from 'axios';
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    user: null,   // email, name, role, etc.
+    user: JSON.parse(localStorage.getItem('user')) || null,   // email, name, role, etc.
     token: null,
   }),
+  getters: {
+    isAuthenticated: (state) => !!state.token,
+    isAdmin: (state) => state.user?.role === 'admin',
+  },
   actions: {
     async login({ email, password }) {
       const { data } = await axios.post('http://localhost:3000/auth/login', { email, password });

@@ -153,10 +153,6 @@ const fetchRestaurants = async () => {
   }
 };
 
-// Función para seleccionar un restaurante y ver su menú
-const selectRestaurant = (restaurant) => {
-  selectedRestaurant.value = restaurant;
-};
 
 // Función para añadir artículos al carrito
 const addToCart = (item) => {
