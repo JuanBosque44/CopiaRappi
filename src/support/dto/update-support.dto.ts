@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator'
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 import { SupportStatus } from '../entities/support.entity'
 
 export class UpdateSupportDto {
@@ -8,4 +8,7 @@ export class UpdateSupportDto {
     @IsOptional()
     @IsString()
     adminComment?: string;
+
+    @IsNumber()
+    UserId: number;
 }

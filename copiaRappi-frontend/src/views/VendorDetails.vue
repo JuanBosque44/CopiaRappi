@@ -72,7 +72,6 @@ const deleteReview = async (reviewId) => {
         await axios.delete(`http://localhost:3000/reviews/${reviewId}`, {
             headers: { Authorization: `Bearer ${userStore.token}` },
         });
-        // Actualizar la lista de reseñas después de eliminar
         vendorsData.value.reviews = vendorsData.value.reviews.filter(review => review.id !== reviewId);
     } catch (err) {
         console.error('Error al eliminar la reseña:', err);
@@ -163,11 +162,12 @@ other-reviews {
     border: 1px solid #cccccc;
     border-radius: 8px;
     text-align: center;
+    background-color: lightgray;
 }
 
 .star {
     font-size: 2rem;
-    color: #ccc;
+    color: darkgray;
     cursor: pointer;
 }
 .star.active {

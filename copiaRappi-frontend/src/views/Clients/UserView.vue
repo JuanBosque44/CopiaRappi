@@ -4,7 +4,6 @@
 
     <div v-if="loading">Cargando órdenes...</div>
 
-    <!-- Búsqueda de restaurantes -->
     <div class="search-container">
       <input 
         v-model="searchQuery" 
@@ -24,7 +23,6 @@
       </div>
     </div>
 
-    <!-- Ver menú completo -->
     <div v-if="selectedRestaurant">
       <h3>Menú de {{ selectedRestaurant.name }}</h3>
       <ul>
@@ -48,7 +46,7 @@
     </div>
 
     <!-- Ver órdenes -->
-    <div v-else-if="orders.length">
+    <!-- <div v-else-if="orders.length">
       <h3>Mis órdenes:</h3>
       <div>
         <ul>
@@ -57,7 +55,7 @@
           </li>
         </ul>
       </div>
-    </div>
+    </div> -->
     
     
 
@@ -89,7 +87,7 @@ const cartTotal = computed(() => {
 const user = computed(() => userStore.user);
 
 // Función para cargar las órdenes
-const fetchOrders = async () => {
+/* const fetchOrders = async () => {
   if (!user.value) return;
 
   loading.value = true;
@@ -110,7 +108,7 @@ const fetchOrders = async () => {
   } finally {
     loading.value = false;
   }
-};
+}; */
 
 // Función para buscar restaurantes
 const searchRestaurants = async () => {
@@ -191,7 +189,7 @@ const checkout = async () => {
 
 
 onMounted(() => {
-  fetchOrders();
+/*   fetchOrders();*/  
   fetchRestaurants();
 });
 </script>

@@ -36,6 +36,12 @@ const routes = [
     meta: { requiresAuth: true, roles: ['CLIENT', 'VENDOR', 'DRIVER'] },
   },
   {
+    path: '/user/support',
+    name: 'user-support',
+    component: () => import('../views/UserSupportView.vue'),
+  },
+
+  {
     path: '/vendors/:vendorId',
     name: 'vendor-products',
     component: () => import('../views/VendorDetails.vue'),

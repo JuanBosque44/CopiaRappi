@@ -22,8 +22,8 @@
           <br>
           {{ msg.status }}
           <br>
-          {{ msg.description }} — De: {{ msg.user.email }}
-          <button :disabled="msg.status === 'RESOLVED'" @click="respondMessage">Responder</button>
+          {{ msg.description }} — De: {{ emails }}
+          <button :disabled="msg.status === 'RESOLVED'" @click="respondMessage(msg)">Responder</button>
         </li>
       </ul>
     </div>
@@ -51,7 +51,7 @@ const fetchUsers = async () => {
     );
     users.value = data || [];
   } catch (err) {
-    console.warn('⚠️ Error fetching users, usando mock');
+    console.warn('⚠️ Error fetching users:' + err);
   }
 };
 
@@ -69,6 +69,7 @@ const deleteUser = async (id) => {
 
 const messages = ref([]);
 const mensajeError = ref('');
+const emails = ref([]);
 
 const receiveMessages = async () => {
   try {
@@ -77,23 +78,34 @@ const receiveMessages = async () => {
     );
     messages.value = data.data || [];
     console.log('Mensajes recibidos:', messages.value);
+
+    for (var i = 0; i < messages.value.length; i++) {
+      console.log('Obteniendo email para el usuario ID:', messages.value[i].userId);
+      const user = await axios.get('http://localhost:3000/user/'+messages.value[i].userId, authHeaders());
+      emails.value = user.data.email;
+    }
   } catch (err) {
-    console.error('Error fetching messages:', err);
+    console.error('Error al recibir los mensajes: ', err);
     mensajeError.value = 'No se pudieron cargar los mensajes.';
     messages.value = [];
   }
 }
 
-const respondMessage = async (id) => {
+const respondMessage = async (msg) => {
   try{
+    if(msg.status === 'RESOLVED'){
+      alert('El mensaje ya ha sido resuelto.');
+      return;
+    }
     const body = {
       response: 'Tu mensaje ha sido resuelto. Gracias por contactarnos.',
-      status: 'RESOLVED'
+      status: 'RESOLVED',
+      UserId: msg.userId
     };
     const response = await axios.put('http://localhost:3000/support/'+msg.id+'/response', body, authHeaders());
     console.log('Mensaje respondido:', response.data);
     messages.value = messages.value.map(msg => 
-      msg.id === id ? { ...msg, status: 'RESOLVED', response: body.response } : msg
+      msg.id === msg.id ? { ...msg, status: 'RESOLVED', response: body.response } : msg
     );
   }
   catch(ex){
@@ -152,7 +164,6 @@ button:disabled {
   background-color: #aaa; 
 }
 
-/* Agregar los mensajes a la derecha*/ 
 </style>
 
 

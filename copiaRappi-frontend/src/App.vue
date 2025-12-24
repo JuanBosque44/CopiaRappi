@@ -4,7 +4,7 @@
       <h1>CopiaRappi</h1>
       <nav>
         <router-link to="/register" v-if="!user">Registro</router-link> 
-        <router-link to="/" v-if="user.role !== 'CLIENT'">Home</router-link>
+        <router-link to="/" v-if="user && user.role !== 'CLIENT'">Home</router-link>
         <router-link to="/user" v-else>Inicio</router-link>
         <router-link to="/login">Login</router-link>
         <router-link to="/profile" v-if="user">Mi Perfil</router-link>
@@ -28,16 +28,7 @@ const user = computed(() => userStore.user);
 
 onMounted(async () => {
   if (userStore.token) {
-    try {
-      await axios.get('/auth/me', {
-        headers: {
-          Authorization: `Bearer ${userStore.token}`,
-        },
-      });
-    } catch {
-      userStore.logout();
-      router.push('/login');
-    }
+    await userStore.validateSession();
   }
 });
 

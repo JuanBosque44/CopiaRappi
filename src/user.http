@@ -1,4 +1,4 @@
-@JWT = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImVtYWlsIjoibWFyaWFAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwidmVuZG9yUHJvZmlsZUlkIjpudWxsLCJkcml2ZXJQcm9maWxlSWQiOm51bGwsImJhY2tPZmZpY2VQcm9maWxlSWQiOm51bGwsImlhdCI6MTc2MzEzMzA1NiwiZXhwIjoxNzYzMTM2NjU2fQ.lEyMOuLrKeBJuSiDI_6y1gnBvcga4eGzwo2pQkYCVvM
+@JWT = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUzLCJlbWFpbCI6InNhY2FjaGlzcGFzQGdtYWlsLmNvbSIsInJvbGUiOiJBRE1JTiIsInZlbmRvclByb2ZpbGVJZCI6bnVsbCwiZHJpdmVyUHJvZmlsZUlkIjpudWxsLCJiYWNrT2ZmaWNlUHJvZmlsZUlkIjpudWxsLCJpYXQiOjE3NjY0MzAwODQsImV4cCI6MTc2Njc4NjQ4NH0._S9qzIgBn2U4IVn8drhFNeCz3FKFDbxQbuf8i_OwKbs
 
 ### Registrar usuarios (driver)
 POST http://localhost:3000/auth/register
@@ -57,7 +57,7 @@ Content-Type: application/json
 
 
 ### solo admin y client
-GET http://localhost:3000/user/8
+GET http://localhost:3000/user/52
 Authorization: Bearer {{JWT}}
 
 

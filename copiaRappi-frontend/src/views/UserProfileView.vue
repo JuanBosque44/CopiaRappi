@@ -2,7 +2,8 @@
   <div class="profile-container">
     <h1>Mi Perfil</h1>
     <nav style="margin-bottom: 2%;" v-if="user.role === 'CLIENT'">
-     <router-link to="/user/orders">Mis Órdenes</router-link>
+     <router-link to="/user/orders">Mis Órdenes</router-link> |
+     <router-link to="/user/support">Soporte</router-link>
     </nav>
 
     <div v-if="user">
@@ -71,13 +72,13 @@ onMounted(async () => {
     try {
       const res = await axios.get(`http://localhost:3000/user/${user.value.id}/orders`, authHeaders());
       orders.value = res.data;
+      fetchFavoriteVendors();
     } catch (err) {
       console.error('Error al cargar órdenes:', err);
       ordersError.value = err.response?.data?.message || 'No se pudieron cargar las órdenes';
     }
   }
 
-  fetchFavoriteVendors();
 });
 
 const updateProfile = async () => {

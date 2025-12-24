@@ -1,6 +1,6 @@
 ### Variables
 @HOST = http://localhost:3000
-@JWT = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUzLCJlbWFpbCI6InNhY2FjaGlzcGFzQGdtYWlsLmNvbSIsInJvbGUiOiJBRE1JTiIsInZlbmRvclByb2ZpbGVJZCI6bnVsbCwiZHJpdmVyUHJvZmlsZUlkIjpudWxsLCJiYWNrT2ZmaWNlUHJvZmlsZUlkIjpudWxsLCJpYXQiOjE3NjMxMzQzMjIsImV4cCI6MTc2MzEzNzkyMn0.uqiv0fzyZkHAZPvu2v4jhsmcEOx6kgV5hToKL_YyuGE
+@JWT = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUzLCJlbWFpbCI6InNhY2FjaGlzcGFzQGdtYWlsLmNvbSIsInJvbGUiOiJBRE1JTiIsInZlbmRvclByb2ZpbGVJZCI6bnVsbCwiZHJpdmVyUHJvZmlsZUlkIjpudWxsLCJiYWNrT2ZmaWNlUHJvZmlsZUlkIjpudWxsLCJpYXQiOjE3NjYyNjE1MzUsImV4cCI6MTc2NjYxNzkzNX0.lKq0qcozOTJ23uL5i1A95tfX-p_aJ2-UyPIbm-uEA-w
 
 ###
 # Backoffice: Crear driver (usa JWT con rol BACKOFFICE/ADMIN)
@@ -113,6 +113,12 @@ Content-Type: application/json
   "insurancePolicy": "POL123",
   "userId": 1
 }
+
+
+###
+
+GET {{HOST}}/support/requests?page=1&limit=10
+Authorization: Bearer {{JWT}}
 
 ###
 # Nota:

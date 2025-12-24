@@ -5,6 +5,7 @@ import { UpdateSupportDto } from './dto/update-support.dto';
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from 'src/users/entities/user/user.entity';
 import { validateParameters } from 'src/shared/utils/parameters-validation';
+import { Public } from 'src/auth/public.decorator';
 
 @Controller('support')
 export class SupportController {
@@ -25,6 +26,12 @@ export class SupportController {
 		if (page) options.page = Number(page);
 		if (limit) options.limit = Number(limit);
     return this.supportService.findAll(Object.keys(options).length ? options : {});
+  }
+
+  @Get('categories')
+  @Public()
+  findCategories() {
+    return this.supportService.findCategories();
   }
 
   @Get('my-requests/:id') 

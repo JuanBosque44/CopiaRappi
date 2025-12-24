@@ -26,10 +26,18 @@ export const useUserStore = defineStore('user', {
         this.token = token;
       }
     },
+    validateSession() {
+      return this.isAuthenticated;
+    },
+    restoreSession() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        this.token = token;
+      }
+    },
     logout() {
       this.user = null;
       this.token = null;
-      localStorage.removeItem('user');
       localStorage.removeItem('token');
     },
   },

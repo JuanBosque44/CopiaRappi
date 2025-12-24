@@ -78,12 +78,12 @@ export class SupportService implements IServiceInterface<Support, CreateSupportD
 
   async update(id: number, updateSupportDto: UpdateSupportDto) : Promise<any>{
     try{
-      const user = await this.userService.findOne(id)
+      const user = await this.userService.findOne(updateSupportDto.UserId)
       if(!user || user.role === UserRole.ADMIN){
         throw new NotFoundException('Usuario no encontrado o inválido')
       }
       const support = await this.supportRepository.findOne({
-        where: { user: { id: user.id } },
+        where: { id: id },
       });
 
       if (!support) {
@@ -107,5 +107,9 @@ export class SupportService implements IServiceInterface<Support, CreateSupportD
 
   delete(id: number) : Promise<any> {
     return this.supportRepository.delete(id);
+  }
+
+  async findCategories() : Promise<SupportCategory[]> {
+    return Object.values(SupportCategory);
   }
 }
