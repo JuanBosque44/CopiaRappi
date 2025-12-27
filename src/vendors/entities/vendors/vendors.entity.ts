@@ -12,6 +12,9 @@ export class Vendor {
   @Column({ default: 'Sin nombre' })
   shopName: string;
 
+  @Column({ nullable: true })
+  description: string;
+
   @ManyToMany(() => User, (user) => user.favoriteVendors)
   favoritedBy: User[];
 

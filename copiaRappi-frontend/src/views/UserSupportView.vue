@@ -7,13 +7,10 @@
     const selectedReason = ref('');
 
     const submitForm = async () => {
-        console.log('Razón seleccionada:', selectedReason.value);
-        console.log('Mensaje:', message.value);
         const json = await axios.post('http://localhost:3000/support/contact', { supportCategory: selectedReason.value, description: message.value }, {
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
-        alert(`Comentario enviado: ${message.value}`);
-        console.log(json);
+        alert(`¡Comentario enviado!`);
         message.value = '';
     };
 

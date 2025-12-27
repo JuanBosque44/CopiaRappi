@@ -16,6 +16,7 @@ import { PaymentResponseDto } from 'src/payments/payments/dto/payment-response.d
 import { PaginatedResult } from 'src/shared/interfaces/paginatedResult.type';
 import { paginate } from 'src/shared/utils/pagination';
 import { Product } from 'src/products/entities/products/products.entity';
+import { ProductRequestDto } from 'src/products/entities/dto/product-request.dto';
 
 @Injectable()
 export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, UpdateOrderDto> {
@@ -31,13 +32,17 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
         private readonly paymentsService: PaymentsService
     ) {}
 
-    findAll(options: {page?: number; limit?: number; [key: string]: any} = {} ): Promise<Order[] | PaginatedResult<Order>> {
+    // falta añadir filtro por vendorId
+    findAll(options: {page?: number; limit?: number; [key: string]: any, vendorId?: number} = {} ): Promise<Order[] | PaginatedResult<Order>> {
         const relations = ['user']
+        const vendorId = options.vendorId || undefined;
 
-        if(options.limit && options.page) return paginate(this.orderRepository, options.page, options.limit, {relations})
+        console.log(vendorId)
+        if(options.limit && options.page) return paginate(this.orderRepository, options.page, options.limit, {relations}, vendorId ? { items: { product: { vendor: { id: vendorId } } } } : {})
         
         return this.orderRepository.find({
-            relations 
+            where: { vendorId },
+            relations
         });
     }
 
@@ -127,6 +132,20 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
         const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
         const totalAmount = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0); 
 
+        const productDto = plainToInstance(
+            ProductRequestDto,
+            (order.items || []).map(p => ({
+                name: p.product.name,
+                description: p.product.description,
+                price: typeof p.price === 'string' ? parseFloat(p.price as any) : p.price,
+                category: p.product.category ? { id: p.product.category.id, name: p.product.category.name } : undefined,
+                imageUrl: p.product.imageUrl,
+                vendor: p.product.vendor ? { id: p.product.vendor.id, name: p.product.vendor.shopName } : undefined,
+                isAvailable: p.product.isActive && p.product.stock > 0,
+                quantity: p.quantity,
+            }))
+        )
+
         const paymentDtos = plainToInstance(
             PaymentResponseDto,
             (order.payments || []).map(p => ({
@@ -145,6 +164,7 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
         dto.payments = paymentDtos;
         dto.totalAmount = totalAmount;
         dto.totalItems = totalItems;
+        dto.items = productDto;
         return dto;
     }
 }

@@ -40,7 +40,7 @@ const routes = [
     name: 'user-support',
     component: () => import('../views/UserSupportView.vue'),
   },
-
+  //Rutas de vendor
   {
     path: '/vendors/:vendorId',
     name: 'vendor-products',
@@ -48,16 +48,35 @@ const routes = [
     meta: { requiresAuth: true, roles: ['CLIENT', 'VENDOR', 'DRIVER'] },
   },
   {
-    path: '/driver',
-    name: 'driver',
-    component: DriverView,
-    meta: { requiresAuth: true, roles: ['DRIVER'] },
-  },
-  {
     path: '/vendor',
     name: 'vendor',
     component: VendorView,
     meta: { requiresAuth: true, roles: ['VENDOR'] },
+  },
+  {
+    path: '/vendor/products',
+    name: 'vendor-products-management',
+    component: () => import('../views/Vendors/VendorProductsView.vue'),
+    meta: { requiresAuth: true, roles: ['VENDOR'] },
+  },
+  {
+    path: '/vendor/orders',
+    name: 'vendor-orders',
+    component: () => import('../views/Vendors/VendorOrdersView.vue'),
+    meta: { requiresAuth: true, roles: ['VENDOR'] },
+  },
+  {
+    path: '/vendor/reports',
+    name: 'vendor-stats',
+    component: () => import('../views/Vendors/VendorReportView.vue'),
+    meta: { requiresAuth: true, roles: ['VENDOR'] },
+  },
+  //Rutas de driver
+  {
+    path: '/driver',
+    name: 'driver',
+    component: DriverView,
+    meta: { requiresAuth: true, roles: ['DRIVER'] },
   },
   {
     path: '/profile',

@@ -180,7 +180,10 @@ other-reviews {
 .deleteComment {
     float: right;
     cursor: pointer;
-    color: lightgray;
+    color: darkgray;
+}
+.deleteComment:hover {
+    color: red;
 }
 
 </style>

@@ -10,6 +10,7 @@ import { PaginatedResult } from 'src/shared/interfaces/paginatedResult.type';
 import { paginate } from 'src/shared/utils/pagination';
 import { VendorResponseDto } from './entities/dto/vendor-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { VendorStatisticsDto } from './entities/dto/vendor-statistics.dto';
 
 @Injectable()
 export class VendorsService implements IServiceInterface <Vendor, CreateVendorDto, UpdateVendorDto, VendorResponseDto> {
@@ -91,10 +92,21 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
     return this.productRepository.find({ where: { vendor: { id: vendorId } } });
   }
 
-  getStatistics(vendorId: number) {
-    return {
-      totalProducts: 10, // ejemplo fijo, luego lo calculas dinámicamente
-      totalSales: 2500,  // ejemplo fijo
-    };
+  async getStatistics(vendorId: number) {
+    const vendor = await this.vendorsRepository.findOne({
+      where: { id: vendorId },
+      relations: ['products', 'orders'],
+    });
+    if (!vendor) {
+      throw new NotFoundException(`Vendedor con id ${vendorId} no encontrado`);
+    }
+    let vendorStatisticsDto = new VendorStatisticsDto();
+    Object.assign(vendorStatisticsDto, {
+      totalOrders: vendor.orders.length,
+      totalSales: vendor.orders.reduce((total, order) => total + order.totalAmount, 0),
+      completedOrders: vendor.orders.filter(order => order.status === 'COMPLETED').length,
+    });
+    console.log(vendorStatisticsDto);
+    return vendorStatisticsDto;
   }
 }

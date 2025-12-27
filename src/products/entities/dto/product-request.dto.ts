@@ -26,4 +26,7 @@ export class ProductRequestDto{
     @Expose()
     @Type(() => VendorResponseDto)
     vendor: VendorResponseDto;
+
+    @Expose()
+    quantity?: number;
 }

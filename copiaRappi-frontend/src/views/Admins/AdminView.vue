@@ -1,36 +1,45 @@
 <template>
   <div class="admin-container">
     <h1>Panel de Administración</h1>
-
-    <div v-if="users.length">
-      <h3>Lista de usuarios:</h3>
-      <ul>
-        <li v-for="u in users" :key="u.id">
-          {{ u.name }} — {{ u.email }} — Rol: {{ u.role }}
-          <button class="button" @click="deleteUser(u.id)">Eliminar</button>
-        </li>
-      </ul>
-    </div>
-    <div v-else>
-      <p>No hay usuarios registrados.</p>
-    </div>
-    <h4>Mensajes recibidos</h4>
-    <div v-if="messages.length !== 0">
-      <ul>
-        <li v-for="msg in messages" :key="msg.id">
-          {{ msg.supportCategory }}
+    <div class="admin-grid">
+      <section>
+        <div v-if="users.length">
+          <h3>Lista de usuarios:</h3>
+          <ul>
+            <li v-for="u in users" :key="u.id">
+              {{ u.name }} — {{ u.email }} — Rol: {{ u.role }}
+              <button class="button" @click="deleteUser(u.id)">Eliminar</button>
+            </li>
+          </ul>
+          </div>
+          <div v-else>
+            <p>No hay usuarios registrados.</p>
+          </div>
+      </section>
+      <section>
+        
+        <h4>Mensajes recibidos:</h4>
+        <div v-if="messages.length !== 0">
+          <ul>
+            <li v-for="msg in messages" :key="msg.id">
+              {{ msg.supportCategory }}
+              <br>
+              {{ msg.status }}
+              <br>
+              {{ msg.description }} — De: {{ emails }}
+              <button :disabled="msg.status === 'RESOLVED'" @click="respondMessage(msg)">Responder</button>
+            </li>
+          </ul>
+        </div>
+        <span v-else class="error-message">
+          No hay mensajes recibidos.
           <br>
-          {{ msg.status }}
-          <br>
-          {{ msg.description }} — De: {{ emails }}
-          <button :disabled="msg.status === 'RESOLVED'" @click="respondMessage(msg)">Responder</button>
-        </li>
-      </ul>
+        </span>
+        <button class="btn-paginas" :disabled="page <= 1" @click="receiveMessages(-1)" >Anterior</button>
+        <button class="btn-paginas" :disabled="page >= totalPages" @click="receiveMessages(1)">Siguiente</button>
+      </section>
     </div>
-    <span v-else class="error-message">
-      No hay mensajes recibidos.
-    </span>
-  </div>
+  </div>  
 </template>
 
 <script setup>
@@ -40,6 +49,8 @@ import axios from 'axios';
 
 const userStore = useUserStore();
 const users = ref([]);
+let page = ref(1);
+let totalPages = ref(1);
 
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${userStore.token}` } });
 
@@ -51,7 +62,7 @@ const fetchUsers = async () => {
     );
     users.value = data || [];
   } catch (err) {
-    console.warn('⚠️ Error fetching users:' + err);
+    console.warn('⚠️ Error al buscar usuarios:' + err);
   }
 };
 
@@ -71,16 +82,23 @@ const messages = ref([]);
 const mensajeError = ref('');
 const emails = ref([]);
 
-const receiveMessages = async () => {
+const receiveMessages = async (incremento) => {
   try {
+    page.value += incremento;
     const { data } = await axios.get(
-      'http://localhost:3000/support/requests?page=1&limit=5', authHeaders()
+      'http://localhost:3000/support/requests?page='+page.value+'&limit=5', authHeaders()
     );
     messages.value = data.data || [];
-    console.log('Mensajes recibidos:', messages.value);
+    totalPages.value = data.meta.pages || 0;
+    if (page.value > totalPages.value) {
+      page.value = totalPages.value;
+    }
+    if (page.value < 1 || isNaN(page.value)) {
+      page.value = 1;
+    }
+    console.log('Mensajes recibidos');
 
     for (var i = 0; i < messages.value.length; i++) {
-      console.log('Obteniendo email para el usuario ID:', messages.value[i].userId);
       const user = await axios.get('http://localhost:3000/user/'+messages.value[i].userId, authHeaders());
       emails.value = user.data.email;
     }
@@ -115,13 +133,13 @@ const respondMessage = async (msg) => {
 
 onMounted(() => {
   fetchUsers();
-  receiveMessages();
+  receiveMessages(0);
 });
 </script>
 
 <style scoped>
 .admin-container {
-  max-width: 700px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 1rem;
   text-align: center;
@@ -152,7 +170,25 @@ li {
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
+  margin-left: 1%;
 }
+
+.btn-paginas {
+  margin: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
 
 .button:hover {
   background: #c0392b;

@@ -14,11 +14,12 @@ export class OrdersController {
 
     @Get()
     @Roles(UserRole.ADMIN, UserRole.CLIENT, UserRole.VENDOR)
-    findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
-        if(!validateParameters(page, limit)) throw new InternalServerErrorException('Parametros inválidos')
+    findAll(@Query('page') page?: string, @Query('limit') limit?: string, @Query('vendorId') vendorId?: string) {
+        if(!validateParameters(page, limit, vendorId)) throw new InternalServerErrorException('Parametros inválidos')
         const options: any = {};
 		if (page) options.page = Number(page);
 		if (limit) options.limit = Number(limit);
+        if (vendorId) options.vendorId = Number(vendorId);
 
         return this.ordersService.findAll(Object.keys(options).length ? options : {});
     }

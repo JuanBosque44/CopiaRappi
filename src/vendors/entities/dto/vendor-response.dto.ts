@@ -11,6 +11,9 @@ export class VendorResponseDto{
     shopName: string
 
     @Expose()
+    description: string
+
+    @Expose()
     @Type(() => ProductRequestDto)
     product: ProductRequestDto[]
 

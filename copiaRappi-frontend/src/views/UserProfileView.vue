@@ -1,7 +1,7 @@
 <template>
   <div class="profile-container">
     <h1>Mi Perfil</h1>
-    <nav style="margin-bottom: 2%;" v-if="user.role === 'CLIENT'">
+    <nav style="margin-bottom: 2%;" v-if="user.role !== 'ADMIN'">
      <router-link to="/user/orders">Mis Órdenes</router-link> |
      <router-link to="/user/support">Soporte</router-link>
     </nav>
@@ -13,7 +13,12 @@
         <!--
           <input v-model="password" type="password" placeholder="Contraseña" />
         -->
-        <input v-model="address" type="text" placeholder="Dirección">
+        <input v-if="user.role === 'CLIENT'" v-model="address" type="text" placeholder="Dirección">
+        <!-- <div v-if="user.role === 'DRIVER'">
+          <input type="text" :value="user.driverProfile" disabled placeholder="Teléfono" />
+          <input type="text" :value="user.driverProfile" disabled placeholder="Información del Vehículo" />
+          <input type="text"  disabled placeholder="Placa del Vehículo" />
+        </div> -->
         <button type="submit" :disabled="loading">Actualizar Perfil</button>
       </form>
       <p v-if="profileMessage" :class="{ error: profileError }">{{ profileMessage }}</p>
@@ -68,7 +73,7 @@ const authHeaders = () => ({ headers: { Authorization: `Bearer ${userStore.token
 onMounted(async () => {
   if (!user.value) return;
 
-  if (user.value.role !== 'ADMIN') {
+  if (user.value.role === 'CLIENT') {
     try {
       const res = await axios.get(`http://localhost:3000/user/${user.value.id}/orders`, authHeaders());
       orders.value = res.data;

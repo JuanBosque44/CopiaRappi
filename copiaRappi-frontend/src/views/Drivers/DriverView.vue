@@ -1,7 +1,5 @@
 <template>
   <div class="driver-container">
-    <h2>Driver View</h2>
-    <p>Solo drivers pueden ver esto.</p>
 
     <div v-if="orders.length">
       <h3>Mis órdenes:</h3>
@@ -41,11 +39,8 @@ const fetchOrders = async () => {
     );
     orders.value = data || [];
   } catch (err) {
-    console.warn('⚠️ Error fetching orders, usando datos simulados');
-    orders.value = [
-      { id: 1, status: 'pendiente', total: 25.0 },
-      { id: 2, status: 'en camino', total: 40.5 },
-    ];
+    console.warn('⚠️ Error al obtener órdenes del conductor:', err);
+    orders.value = [];
   }
 };
 
