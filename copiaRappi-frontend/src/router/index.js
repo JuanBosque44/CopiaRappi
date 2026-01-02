@@ -79,6 +79,12 @@ const routes = [
     meta: { requiresAuth: true, roles: ['DRIVER'] },
   },
   {
+    path: '/driver/revenue',
+    name: 'driver-revenue',
+    component: () => import('../views/Drivers/DriverRevenueView.vue'),
+    meta: { requiresAuth: true, roles: ['DRIVER'] },
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: UserProfileView,

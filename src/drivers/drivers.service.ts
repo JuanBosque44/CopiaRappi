@@ -9,6 +9,8 @@ import { IServiceInterface } from 'src/shared/interfaces/service.interface';
 import { PaginatedResult } from 'src/shared/interfaces/paginatedResult.type';
 import { FindDriverDto } from './entities/dto/find-driver.dto';
 import { paginate } from 'src/shared/utils/pagination';
+import { DriverOrdersResponseDto } from './entities/dto/driver-orders-response.dto';
+import { OrderSummaryDto } from 'src/orders/entities/dto/order-summary.dto';
 
 
 @Injectable()
@@ -36,7 +38,11 @@ export class DriversService implements IServiceInterface<Driver, CreateDriverDto
     }
   }
 
-  
+  /**
+   * 
+   * @param id recibe el id del perfil de driver
+   * @returns informacion del perfil del driver y sus relaciones con su usuario y ordenes
+   */
   async findOne(id: number): Promise<Driver> {
     const driver = await this.driverRepository.findOne({
       where: { id },
@@ -85,6 +91,12 @@ export class DriversService implements IServiceInterface<Driver, CreateDriverDto
     }
   }
   
+  /**
+   * 
+   * @param id id del perfil de driver o driverProfileId
+   * @param updateDriverDto datos a modificar, no es necesario que se complete todo el dto para que funcione
+   * @returns 
+   */
   async update(id: number, updateDriverDto: UpdateDriverDto): Promise<Driver> {
     try {
       const driver = await this.findOne(id);
@@ -101,7 +113,6 @@ export class DriversService implements IServiceInterface<Driver, CreateDriverDto
         }
       }
 
-      //  Actualizar campos
       Object.assign(driver, updateDriverDto);
 
       const updatedDriver = await this.driverRepository.save(driver);
@@ -111,7 +122,9 @@ export class DriversService implements IServiceInterface<Driver, CreateDriverDto
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error.cause;
       }
-      throw new InternalServerErrorException('Error al actualizar el driver: '+ error);
+      else{
+        throw new InternalServerErrorException('Error al actualizar el driver: '+ error);
+      }
     }
   }
 
@@ -204,6 +217,33 @@ export class DriversService implements IServiceInterface<Driver, CreateDriverDto
         year: driver.vehicleYear,
       },
     };
+  }
+
+  async getDriverOrders(id: number) {
+    const driver = await this.findOne(id);
+    if(!driver) throw new NotFoundException('No se ha encontrado el repartidor.')
+    const ordersDto = new DriverOrdersResponseDto();
+    const orderSummary = new OrderSummaryDto();
+    const allOrders = new Array<OrderSummaryDto>();
+    driver.orders.forEach(order => {
+      Object.assign(orderSummary, {
+        id: 0,
+        totalAmount: order.totalAmount,
+        status: order.status,
+        payments: order.payments,
+        items: order.items,
+        totalItems: order.items.length,
+      });
+      allOrders.push(orderSummary);
+    });
+    Object.assign(ordersDto, {
+      id: driver.id,
+      orders: allOrders,
+      totalOrders: driver.orders.length,
+      date: driver.orders.length > 0 ? driver.orders[0].createdAt : null,
+    });
+    console.log(ordersDto);
+    return ordersDto;  
   }
 
   async delete(id: number): Promise<void> {

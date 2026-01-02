@@ -35,6 +35,14 @@
         </li>
       </ul>
 
+      <div v-if="user.role === 'DRIVER'" class="profile-container">
+        <h2>Actividad</h2>
+        <div class="available">
+          <label for="disponibilidad">Disponible:</label>
+          <input type="checkbox" id="disponibilidad" v-model="available" @change="changeAvailability" />
+        </div>
+      </div>
+
       <button @click="logout">Cerrar sesión</button>
     </div>
 
@@ -68,6 +76,8 @@ const profileError = ref(false);
 const loading = ref(false);
 const loadingFavorites = ref(false);
 
+const available = ref(true);
+
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${userStore.token}` } });
 
 onMounted(async () => {
@@ -82,6 +92,10 @@ onMounted(async () => {
       console.error('Error al cargar órdenes:', err);
       ordersError.value = err.response?.data?.message || 'No se pudieron cargar las órdenes';
     }
+  }
+
+  if (user.value.role === 'DRIVER') {
+    await getAvailable();
   }
 
 });
@@ -106,6 +120,26 @@ const updateProfile = async () => {
   } finally {
     loading.value = false;
     password.value = '';
+  }
+};
+
+const changeAvailability = async () => {
+  try {
+    await axios.put(`http://localhost:3000/drivers/${user.value.driverProfileId}`, { isActive: available.value }, authHeaders());
+    profileMessage.value = 'Disponibilidad actualizada correctamente: ' + (available.value ? 'Disponible' : 'No Disponible');
+  } catch (err) {
+    console.error('Error al cambiar disponibilidad:', err);
+    alert('No se pudo cambiar la disponibilidad');
+    available.value = !available.value; // Revertir el cambio en caso de error
+  }
+};
+
+const getAvailable = async () => {
+  try {
+    const res = await axios.get(`http://localhost:3000/drivers/${user.value.driverProfileId}`, authHeaders());
+    available.value = res.data.isActive;
+  } catch (err) {
+    console.error('Error al obtener disponibilidad:', err);
   }
 };
 
@@ -160,6 +194,19 @@ input {
   font-size: 1rem;
 }
 
+.available {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#disponibilidad {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
 
 
 ul {
@@ -179,4 +226,6 @@ ul li {
   color: red;
   margin-top: 0.5rem;
 }
+
+
 </style>

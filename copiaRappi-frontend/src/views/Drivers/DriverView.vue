@@ -1,13 +1,8 @@
 <template>
   <div class="driver-container">
-
-    <div v-if="orders.length">
-      <h3>Mis órdenes:</h3>
-      <ul>
-        <li v-for="order in orders" :key="order.id">
-          Orden #{{ order.id }} — Estado: {{ order.status }} — Total: ${{ order.total }}
-        </li>
-      </ul>
+    <DriverLayoutView />
+    <div v-if="orders">
+      <OrderCard :orders="orders"/>
     </div>
     <div v-else>
       <p>No tienes órdenes actualmente.</p>
@@ -19,9 +14,11 @@
 import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../../store';
 import axios from 'axios';
+import DriverLayoutView from '../../layouts/DriverLayoutView.vue';
+import OrderCard from '../../components/OrderCard.vue';
 
 const userStore = useUserStore();
-const orders = ref([]);
+const orders = ref({});
 
 const user = computed(() => userStore.user);
 
@@ -30,17 +27,17 @@ const fetchOrders = async () => {
 
   try {
     const { data } = await axios.get(
-      `http://localhost:3000/driver/${user.value.id}/orders`,
+      `http://localhost:3000/drivers/${user.value.driverProfileId}/orders`,
       {
         headers: {
           Authorization: `Bearer ${userStore.token}`,
         },
       }
     );
-    orders.value = data || [];
+    orders.value = data || {};
   } catch (err) {
     console.warn('⚠️ Error al obtener órdenes del conductor:', err);
-    orders.value = [];
+    orders.value = {};
   }
 };
 

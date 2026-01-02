@@ -1,4 +1,4 @@
-import { Controller, Body, Put, Post, Param, Delete, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Body, Put, Post, Param, Delete, InternalServerErrorException, Get, Request } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { UpdateDriverDto } from './entities/dto/update-driver.dto';
 import { Roles } from 'src/auth/roles.decorator';
@@ -25,6 +25,28 @@ export class DriversController {
     update(@Param('id') id:string, @Body() UpdateDriverDto: UpdateDriverDto) {
         if(!validateParameters(id)) throw new InternalServerErrorException('Parametros inválidos')
         return this.driverService.update(+id, UpdateDriverDto);
+    }
+
+    @Get(':id')
+    @Roles(UserRole.DRIVER)
+    async getDriverById(@Param('id') id: string, @Request() req) {
+        if(!validateParameters(id)) throw new InternalServerErrorException('Parametros inválidos')
+        if(id !== req.user.driverProfileId.toString()){
+            throw new InternalServerErrorException('No puedes ver este repartidor')
+        }
+        const driver =  await this.driverService.findOne(+id);
+        return driver? driver : 'No se ha encontrado el repartidor.'
+    }
+
+    @Get(':id/orders')
+    @Roles(UserRole.DRIVER)
+    async getDriverOrders(@Param('id') id: string, @Request() req) {
+        if(!validateParameters(id)) throw new InternalServerErrorException('Parametros inválidos')
+        if(id !== req.user.driverProfileId.toString()){
+            throw new InternalServerErrorException('No puedes ver los pedidos de este repartidor')
+        }
+        const driverOrders = await this.driverService.getDriverOrders(+id);
+        return driverOrders? driverOrders : 'No se han encontrado pedidos para este repartidor.'
     }
        
     @Delete(':id')
