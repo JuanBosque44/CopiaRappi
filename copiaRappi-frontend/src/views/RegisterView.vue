@@ -11,7 +11,6 @@
         <option value="CLIENT">Usuario</option>
         <option value="DRIVER">Conductor</option>
         <option value="VENDOR">Vendedor</option>
-        <option value="ADMIN">Admin</option>
       </select>
 
       <div v-if="role === 'DRIVER'" class="role-form">
@@ -49,14 +48,14 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
-// 📚 Campos Comunes
+// Campos Comunes
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const role = ref('');
 const errorMessage = ref('');
 
-// 🚗 Campos Específicos de DRIVER
+// Campos Específicos de DRIVER
 const phone = ref('');
 const vehicleType = ref(''); 
 const licensePlate = ref('');
@@ -64,7 +63,7 @@ const vehicleBrand = ref('');
 const vehicleModel = ref('');
 const driverLicense = ref('');
 
-// 🏪 Campos Específicos de VENDOR
+// Campos Específicos de VENDOR
 const storeName = ref('');
 const storeAddress = ref('');
 
@@ -87,7 +86,6 @@ const validateFields = () => {
 
   // 2. Validar campos específicos del rol
   if (role.value === 'DRIVER') {
-    // 🛑 VALIDACIÓN NUMÉRICA ESPECÍFICA PARA EL TELÉFONO
     if (phone.value && !isPhoneNumberValid(phone.value)) {
       errorMessage.value = 'El campo Teléfono solo puede contener números y opcionalmente el signo "+".';
       return false;
@@ -104,53 +102,53 @@ const validateFields = () => {
       return false;
     }
   }
+
+  if(role.value === 'ADMIN'){
+    errorMessage.value = 'No puedes registrarte como admin sin permiso.'
+    return false
+  }
   
   return true;
 };
 
 
 const handleRegister = async () => {
-  // 🛑 DETENER el registro si la validación falla
   if (!validateFields()) {
     console.warn('Registro detenido: Faltan campos obligatorios o son inválidos.');
     return;
   }
   
-  // 📦 Construcción del objeto de datos (solo si la validación pasa)
   const userData = {
-  name: name.value,
-  email: email.value,
-  password: password.value,
-  role: role.value,
-};
+    name: name.value,
+    email: email.value,
+    password: password.value,
+    role: role.value,
+  };
 
 // ➕ Agregar campos específicos
-if (role.value === 'DRIVER') {
-  // Ajustar para coincidir con la estructura de driverProfile.DriverDto
-  Object.assign(userData, {
-    driverProfile: {
-      DriverDto: { // Suponiendo que UpdateDriverDto tiene estas propiedades
-        phone: phone.value,
-        driverLicense: driverLicense.value,
-        vehicleType: vehicleType.value,
-        licensePlate: licensePlate.value,
-        vehicleBrand: vehicleBrand.value,
-        vehicleModel: vehicleModel.value,
+  if (role.value === 'DRIVER') {
+    Object.assign(userData, {
+      driverProfile: {
+        DriverDto: { 
+          phone: phone.value,
+          driverLicense: driverLicense.value,
+          vehicleType: vehicleType.value,
+          licensePlate: licensePlate.value,
+          vehicleBrand: vehicleBrand.value,
+          vehicleModel: vehicleModel.value,
+        },
       },
-    },
-  });
-} else if (role.value === 'VENDOR') {
-  // Ajustar para coincidir con la estructura de vendorProfile.VendorDto
-  Object.assign(userData, {
-    vendorProfile: {
-      VendorDto: { // Coincide con CreateVendorDto (que usa shopName, no storeName/storeAddress)
-        shopName: storeName.value, // ¡Asegúrate de usar 'shopName' y no 'storeName'!
-        // Aquí no se incluye UserId porque el backend lo asignará.
+    });
+  } else if (role.value === 'VENDOR') {
+    Object.assign(userData, {
+      vendorProfile: {
+        VendorDto: { 
+          shopName: storeName.value, 
+        },
+        // Si storeAddress es necesario, debe ir en el DTO apropiado (VendorDto o UserDto.address)
       },
-      // Si storeAddress es necesario, debe ir en el DTO apropiado (VendorDto o UserDto.address)
-    },
-  });
-}
+    });
+  }
 
   console.log('Datos de registro a enviar:', userData);
 
@@ -175,29 +173,29 @@ form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1.5rem; /* Añadido padding para que el contenido no pegue al borde */
-  border-radius: 10px; /* 🆕 Bordes redondeados para el formulario */
+  padding: 1.5rem; 
+  border-radius: 10px; 
   border: 1px solid #ddd;
 }
 
 input, select {
-  padding: 0.75rem; /* Aumentado padding para mejor touch/click */
+  padding: 0.75rem; 
   font-size: 1rem;
   border: 1px solid #ccc;
-  border-radius: 6px; /* 🆕 Bordes redondeados para inputs y selects */
+  border-radius: 6px; 
   transition: border-color 0.3s;
 }
 
 input:focus, select:focus {
-    border-color: #42b883; /* Resalta el foco */
+    border-color: #42b883; 
     outline: none;
 }
 
 .role-form {
   border: 1px dashed #42b883;
   padding: 1rem;
-  margin-top: 0.5rem; /* Ajustado el margen superior */
-  border-radius: 8px; /* 🆕 Bordes redondeados para el formulario condicional */
+  margin-top: 0.5rem;
+  border-radius: 8px; 
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -210,13 +208,13 @@ h3 {
 }
 
 button {
-  padding: 0.75rem; /* Aumentado padding para mejor botón */
-  font-size: 1.1rem; /* Ligeramente más grande */
+  padding: 0.75rem; 
+  font-size: 1.1rem; 
   background-color: #42b883;
   color: white;
   border: none;
   cursor: pointer;
-  border-radius: 8px; /* 🆕 Bordes redondeados para el botón */
+  border-radius: 8px; 
   transition: background-color 0.3s, transform 0.1s;
 }
 
@@ -229,7 +227,7 @@ button:active {
 }
 
 .error {
-  color: #e53e3e; /* Color de error un poco más vivo */
+  color: #e53e3e;
   margin-top: 1rem;
   font-weight: bold;
 }

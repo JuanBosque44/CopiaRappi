@@ -2,8 +2,9 @@
   <div class="profile-container">
     <h1>Mi Perfil</h1>
     <nav style="margin-bottom: 2%;" v-if="user.role !== 'ADMIN'">
-     <router-link to="/user/orders">Mis Órdenes</router-link> |
-     <router-link to="/user/support">Soporte</router-link>
+     <router-link to="/user/orders" v-if="user.role === 'CLIENT'">Mis Órdenes </router-link> 
+     <router-link to="/driver" v-if="user.role === 'DRIVER'">Entregas </router-link> 
+     | <router-link to="/user/support">Soporte</router-link>
     </nav>
 
     <div v-if="user">

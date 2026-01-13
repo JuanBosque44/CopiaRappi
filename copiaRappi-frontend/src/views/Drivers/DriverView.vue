@@ -1,7 +1,7 @@
 <template>
   <div class="driver-container">
     <DriverLayoutView />
-    <div v-if="orders">
+    <div v-if="orders.lenght">
       <OrderCard :orders="orders"/>
     </div>
     <div v-else>
@@ -11,14 +11,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useUserStore } from '../../store';
-import axios from 'axios';
 import DriverLayoutView from '../../layouts/DriverLayoutView.vue';
 import OrderCard from '../../components/OrderCard.vue';
+import { useOrders } from '../../composables/useOrders.js';
+
+const { fetchOrdersByDriver, orders } = useOrders();
 
 const userStore = useUserStore();
-const orders = ref({});
 
 const user = computed(() => userStore.user);
 
@@ -26,15 +27,8 @@ const fetchOrders = async () => {
   if (!user.value) return;
 
   try {
-    const { data } = await axios.get(
-      `http://localhost:3000/drivers/${user.value.driverProfileId}/orders`,
-      {
-        headers: {
-          Authorization: `Bearer ${userStore.token}`,
-        },
-      }
-    );
-    orders.value = data || {};
+    if(orders.lenght ===0)
+    await fetchOrdersByDriver(user.value.driverProfileId);
   } catch (err) {
     console.warn('⚠️ Error al obtener órdenes del conductor:', err);
     orders.value = {};
@@ -42,7 +36,7 @@ const fetchOrders = async () => {
 };
 
 onMounted(() => {
-  fetchOrders();
+  fetchOrders(); 
 });
 </script>
 

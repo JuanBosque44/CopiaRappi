@@ -1,20 +1,32 @@
 <script setup>
-    defineProps({
+    import { computed } from 'vue';
+
+    const props = defineProps({
        orders: {
            type: Object,
            required: true
        },
        fecha: {
-           type: String,
+           type: Date,
            required: false
        },
+    });
+    
+    const fechaModif = computed(() => {
+        if (!props.fecha) return null;
+
+        return new Date(props.fecha).toLocaleDateString('es-AR', {
+            year: '2-digit',
+            month: '2-digit',
+            day: '2-digit'
+        });
     });
 </script>
 
 <template>
-    <ul v-if="orders.orders && orders.orders.length" class="container">
-        <li v-for="order in orders.orders" :key="order.id" class="card">
-            Orden #{{ order.id }} - Monto: ${{ order.totalAmount }} <span v-if="fecha">- Fecha: {{ fecha }}</span> <span v-if="order.status"> - Estado: {{ order.status }}</span>
+    <ul v-if="orders && orders.length" class="container">
+        <li v-for="order in orders" :key="order.id" class="card">
+            Orden #{{ order.id }} - Monto: ${{ order.totalAmount }} <span v-if="fecha">- Fecha: {{ fechaModif }}</span> <span v-if="order.status"> - Estado: {{ order.status }}</span>
             <span class="products" v-if="order.items && order.items.length">
                 <h4>Productos:</h4>
                 <ul>

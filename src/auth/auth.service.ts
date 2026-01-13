@@ -11,10 +11,9 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, pass: string) {
-    email.toLowerCase().trim()
+    email = email.toLowerCase().trim()
     const user = await this.usersService.findByEmail(email);
     if (!user) return null;
-
     let valid: boolean;
 
     // Si la contraseña ya está hasheada con bcrypt
@@ -37,7 +36,6 @@ export class AuthService {
       const { password, ...result } = user;
       return result;
     }
-
     throw new UnauthorizedException('Credenciales inválidas');
   }
 
@@ -46,9 +44,9 @@ export class AuthService {
       sub: user.id, 
       email: user.email, 
       role: user.role,
-      vendorProfileId: user.vendorProfile?.id ?? null,
-      driverProfileId: user.driverProfile?.id ?? null,
-      backOfficeProfileId: user.backOfficeProfile?.id ?? null,
+      vendorProfileId: user.vendorProfileId ?? null,
+      driverProfileId: user.driverProfileId ?? null,
+      backOfficeProfileId: user.backOfficeProfileId ?? null,
     };
     
     return {
