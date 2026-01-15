@@ -22,6 +22,11 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
     private readonly productRepository: Repository<Product>,
   ) {}
 
+  /**
+   * 
+   * @param options Opciones de paginado (opcional)
+   * @returns Listado completo de los restaurantes (con o sin paginación en base a los parámetros recibidos) que muestran sus reseñas y productos
+   */
   async findAll(options: {page?: number; limit?: number; [key: string]: any} = {} ): Promise<Vendor[] | PaginatedResult<Vendor> | VendorResponseDto[] | PaginatedResult<VendorResponseDto>> {
     const relations = ['reviews', 'products'];
 
@@ -42,7 +47,8 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
     return plainToInstance(VendorResponseDto, vendor, { excludeExtraneousValues: true})
   }
 
-  // Obtener un vendor por id con sus productos y reviews
+  /**  Obtener un vendor por id con sus productos y reviews.
+   * @param id vendorProfileId del user (id del tipo de usuario vendor).*/ 
   async findOne(id: number): Promise<Vendor> {
     const vendor = await this.vendorsRepository.findOne({
       where: { id },
@@ -54,6 +60,11 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
     return vendor;
   }
 
+  /**
+   * Crea una nueva instancia de vendor asignado a un usuario.
+   * @param dto recibe un DTO con los datos del vendor (shopName, description).
+   * @returns Instancia de vendor perteneciente a un usuario (user).
+   */
   async create(dto: CreateVendorDto): Promise<Vendor> {
       try {
         const vendor = this.vendorsRepository.create(dto);
@@ -81,6 +92,11 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
     await this.vendorsRepository.remove(vendor);
   }
 
+  /**
+   * Busca un restaurante por el nombre, no busca reseñas ni productos del mismo.
+   * @param nombre nombre del restaurante (vendor) recibido desde el front.
+   * @returns el restaurante que tiene el nombre recibido o null en caso de no coincidir.
+   */
   async findByVendorName(nombre: string): Promise<Vendor[]> {
     return this.vendorsRepository
       .createQueryBuilder('vendor')
@@ -88,10 +104,20 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
       .getMany();
   }
 
+  /**
+   * 
+   * @param vendorId Id del vendor que se usará como filtro para buscar sus productos.
+   * @returns Listado de productos.
+   */
   async getProducts(vendorId: number): Promise<Product[]> {
     return this.productRepository.find({ where: { vendor: { id: vendorId } } });
   }
 
+  /**
+   * 
+   * @param vendorId Id del vendor que se usará como filtro para buscar sus productos y órdenes.
+   * @returns  DTO que contiene estadisticas de las ordenes: cantidad, ganancias y completadas.
+   */
   async getStatistics(vendorId: number) {
     const vendor = await this.vendorsRepository.findOne({
       where: { id: vendorId },

@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MinLength, Matches, IsStrongPassword } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Length, MinLength, Matches } from "class-validator";
 import { UserRole } from "../user/user.entity";
 import { UpdateDriverDto } from "src/drivers/entities/dto/update-driver.dto";
 import { CreateVendorDto } from "src/vendors/entities/dto/create-vendor.dto";

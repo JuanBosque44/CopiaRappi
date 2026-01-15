@@ -30,7 +30,7 @@
         <span v-if="favoriteVendors.length === 0" class="error-message">No hay restaurantes marcados como favoritos</span>
         <li v-for="vendor in favoriteVendors" :key="vendor.id">
           {{ vendor.shopName }}
-          <button @click="toggleFavorite(vendor.id)" :disabled="loadingFavorites">
+          <button @click="toggleFavorite(vendor.id)" :disabled="loadingFavorites" class="right-side-btn">
             {{ vendor.isFavorite ? 'Agregar' : 'Quitar' }}
           </button>
         </li>
@@ -65,7 +65,7 @@ const router = useRouter();
 const user = computed(() => userStore.user);
 const name = ref(user.value?.name || '');
 const email = ref(user.value?.email || '');
-const address = ref(user.value?.address || '');
+const address = ref(user.value?.address?.street || '');
 const password = ref('');
 
 const orders = ref([]);
@@ -107,8 +107,8 @@ const updateProfile = async () => {
   profileError.value = false;
 
   try {
-    const body = { name: name.value, email: email.value };
-
+    const body = { name: name.value, email: email.value, address: address.value };
+    console.log(body)
     const res = await axios.put(`http://localhost:3000/user/${user.value.id}`, body, authHeaders());
     userStore.user = res.data;
     localStorage.setItem('user', JSON.stringify(res.data));
@@ -228,5 +228,21 @@ ul li {
   margin-top: 0.5rem;
 }
 
+.right-side-btn {
+  margin-left: auto;
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  background-color: #42b883;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+ul li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
 </style>

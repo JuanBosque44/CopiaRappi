@@ -49,7 +49,7 @@ export class SupportService implements IServiceInterface<Support, CreateSupportD
     }
     catch(error: unknown){
       if(error instanceof Error){
-        console.error('No se ha podido enviar el mensaje. Error: '+ error.message )
+        console.error('No se ha podido enviar el mensaje. Error: ' + error.message)
       }
       else{
         console.error(error)
@@ -59,6 +59,10 @@ export class SupportService implements IServiceInterface<Support, CreateSupportD
     }
   }
 
+  /**
+   * @param options Opciones de paginado
+   * @returns Listado de mensajes de soporte (con o sin paginación en base a las opciones recibidas)
+   */
   findAll(options: {page?: number; limit?: number; [key: string]: any} = {}) : Promise<Support[] | PaginatedResult<Support>> {
     if (options.limit && options.page) return paginate(this.supportRepository, options.page, options.limit);
     
@@ -109,6 +113,10 @@ export class SupportService implements IServiceInterface<Support, CreateSupportD
     return this.supportRepository.delete(id);
   }
 
+  /**
+   * Obtiene un listado de categorias de soporte
+   * @returns Devuelve el listado de las categorías que puede tener un mensaje de soporte
+   */
   async findCategories() : Promise<SupportCategory[]> {
     return Object.values(SupportCategory);
   }

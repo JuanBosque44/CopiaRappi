@@ -53,6 +53,10 @@ export class ReviewService implements IServiceInterface<Review, CreateReviewDto,
     }
   }
 
+  /**
+   * @param options Opciones de paginado
+   * @returns Listado de reseñas (con o sin paginación en base a las opciones recibidas)
+   */
   findAll(options: {page?: number; limit?: number; [key: string]: any} = {}): Promise<Review[] | PaginatedResult<Review>> {
     const relations = ['user', 'vendor'];
 
@@ -85,6 +89,10 @@ export class ReviewService implements IServiceInterface<Review, CreateReviewDto,
     }
   }
 
+  /**
+   * Elimina una review
+   * @param id Recibe la id de la review a eliminar
+   */
   delete(id: number): Promise<any> {
     return this.reviewRepository.delete(id)
   }

@@ -37,7 +37,13 @@ export class ProductsService implements IServiceInterface<Product, CreateProduct
 
 		return this.productRepository.save(product);
 	}
-		
+	
+	/**
+	 * 
+	 * @param options Opciones de paginado
+	 * @param dtoFilter Filtrar productos por categoria o disponibilidad
+	 * @returns Listado de productos (con o sin paginado en base a las opciones recibidas)
+	 */
     async findAll(options: {page?: number; limit?: number; [key: string]: any} = {}, dtoFilter?: FilterProductDto ): Promise<ProductRequestDto[] | PaginatedResult<ProductRequestDto>> {
         const relations = ['category'];
         const where: any = {};

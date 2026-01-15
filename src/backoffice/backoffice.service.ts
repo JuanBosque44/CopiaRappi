@@ -28,9 +28,14 @@ export class BackofficeService implements IServiceInterface <Admin, CreateBackof
     }
 
     async create(body: CreateBackofficeDto): Promise<Admin> {
-        // mapear DTO a entidad (asegura tipos compatibles)
-        const admin = this.backofficeRepository.create(body as Partial<Admin>);
-        return this.backofficeRepository.save(admin);
+        try{
+            const admin = this.backofficeRepository.create(body as Partial<Admin>);
+            return this.backofficeRepository.save(admin);
+        }
+        catch(error)
+        {
+            throw new NotFoundException('Error al crear el admin');
+        }
     }
     
     async update(id: number, body: UpdateBackofficeDto): Promise<any> {

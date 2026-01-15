@@ -45,7 +45,7 @@
                     <label for="">Comentario: </label>
                     <input type="text" v-model="message" placeholder="Escribe tu comentario aquí" required />
                 </div>
-                <button type="submit">Enviar</button>
+                <button type="submit" :disabled="error.length > 0">Enviar</button>
                 <RouterLink to="/profile">Volver al inicio</RouterLink>
             </form>
         </div>
@@ -60,12 +60,14 @@
 .container {
     margin-top: 20px;
 }
+
 form {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 10px;
 }
+
 input {
     padding: 8px;
     font-size: 16px;
@@ -73,24 +75,28 @@ input {
     border-radius: 4px;
     width: 300px;
 }
+
 button {
     padding: 10px;
-    font-size: 16px;
     background-color: #42b883;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
     max-width: 10%;
 }
+
 button:hover {
     background-color: #369870;
 }
+
+button:disabled {
+    background-color: #a5d6c7;
+    cursor: not-allowed;
+}
+
 .form-section {
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
+
 select {
     padding: 8px;
     font-size: 16px;

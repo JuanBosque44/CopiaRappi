@@ -32,7 +32,11 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
         private readonly paymentsService: PaymentsService
     ) {}
 
-    // falta añadir filtro por vendorId
+    /**
+   * @param options Opciones de paginado
+   * @param vendorId Id para filtrar las órdenes pertenecientes al vendor recibido
+   * @returns Listado de órdenes (con o sin paginación/filtro en base a las opciones recibidas)
+   */
     findAll(options: {page?: number; limit?: number; [key: string]: any, vendorId?: number} = {} ): Promise<Order[] | PaginatedResult<Order>> {
         const relations = ['user']
         const vendorId = options.vendorId || undefined;
@@ -119,6 +123,10 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
         return orders
     }
 
+    /**
+     * Obtiene un resumen de la orden
+     * @param id Id de la orden de la que se obtiene un resumen
+     */
     async getSummary(id: number) {
         const order = await this.orderRepository.findOne({
             where: { id },

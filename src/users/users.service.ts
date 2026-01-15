@@ -68,7 +68,7 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
 
   async findByEmail(email: string) {
       const user = await this.userRepository.findOne({
-          where: { email: email },
+        where: { email: email },
       });
       return user
 
@@ -85,8 +85,7 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
           if(validEmail) throw new UnauthorizedException('No se puede crear un usuario con el email ingresado')
 
     if (data.address) {
-      address = this.addressRepository.create(data.address);
-      await this.addressRepository.save(address);
+      this.addressInsert(data.address.street)
     }
 
     const { vendorProfile, backOffice: backOfficeProfile, driverProfile, password, ...restData } = data;
@@ -153,87 +152,87 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
 }
 
   // Método para actualizar usuario
-async update(id: number, body: UpdateUserDto): Promise<User> {
-  const { driverProfile, vendorProfile, backOffice, password, ...rest } = body as any;
+  async update(id: number, body: UpdateUserDto): Promise<User> {
+    const { driverProfile, vendorProfile, backOffice, password, ...rest } = body as any;
 
-  const user = await this.userRepository.findOne({
-    where: { id },
-    relations: ['driverProfile', 'vendorProfile', 'backOfficeProfile', 'address'],
-  });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['driverProfile', 'vendorProfile', 'backOfficeProfile', 'address'],
+    });
 
-  if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user) throw new NotFoundException('Usuario no encontrado');
 
-  // Si se ha enviado una nueva contraseña, la hasheamos antes de guardarla
-  if (password) {
-    const hashedPassword = await bcrypt.hash(password, 10);  // Hashing de la nueva contraseña
-    user.password = hashedPassword;  // Actualizamos la contraseña del usuario
-  }
-
-  // Actualizamos el resto de los datos del usuario
-  Object.assign(user, rest);
-
-  // Si hay un nuevo addressId, buscamos la nueva dirección y la asignamos
-  if (rest.addressId) {
-    const newAddress = await this.addressRepository.findOne({ where: { id: rest.addressId } });
-    if (!newAddress) throw new NotFoundException('Dirección no encontrada');
-    user.address = newAddress;
-    user.addressId = newAddress.id;
-  }
-
-  // Si hay un perfil de vendedor, lo actualizamos
-  if (vendorProfile) {
-    let dtoV: CreateVendorDto;
-    if ((vendorProfile as any).createVendorDto) {
-      dtoV = (vendorProfile as any).createVendorDto as CreateVendorDto;
-    } else {
-      dtoV = Object.assign(new CreateVendorDto(), vendorProfile as unknown as Partial<CreateVendorDto>);
+    // Si se ha enviado una nueva contraseña, la hasheamos antes de guardarla
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);  // Hashing de la nueva contraseña
+      user.password = hashedPassword;  // Actualizamos la contraseña del usuario
     }
-    dtoV.UserId = user.id;
 
-    if (user.vendorProfileId) {
-      await this.vendorsService.update(user.vendorProfileId, dtoV);
-      user.vendorProfile = await this.vendorsService.findOne(user.vendorProfileId);
-    } else {
-      const createdV = await this.vendorsService.create(dtoV);
-      user.vendorProfile = createdV;
-      user.vendorProfileId = createdV.id;
+    Object.assign(user, rest);
+    if (rest.address) {
+      const newAddress = await this.addressInsert(rest.address)
+      user.address = newAddress;
+      user.addressId = newAddress.id;
     }
+
+    // Si hay un perfil de vendedor, lo actualizamos
+    if (vendorProfile) {
+      let dtoV: CreateVendorDto;
+      if ((vendorProfile as any).createVendorDto) {
+        dtoV = (vendorProfile as any).createVendorDto as CreateVendorDto;
+      } else {
+        dtoV = Object.assign(new CreateVendorDto(), vendorProfile as unknown as Partial<CreateVendorDto>);
+      }
+      dtoV.UserId = user.id;
+
+      if (user.vendorProfileId) {
+        await this.vendorsService.update(user.vendorProfileId, dtoV);
+        user.vendorProfile = await this.vendorsService.findOne(user.vendorProfileId);
+      } else {
+        const createdV = await this.vendorsService.create(dtoV);
+        user.vendorProfile = createdV;
+        user.vendorProfileId = createdV.id;
+      }
+    }
+
+    // Si hay un perfil de conductor, lo actualizamos
+    if (driverProfile) {
+      let dtoD: CreateDriverDto = Object.assign(new CreateDriverDto(), driverProfile as unknown as Partial<CreateDriverDto>);
+      (dtoD as any).userId = user.id;
+      if (user.driverProfileId) {
+        await this.driversService.update(user.driverProfileId, dtoD);
+        user.driverProfile = await this.driversService.findOne(user.driverProfileId);
+      } else {
+        const createdD = await this.driversService.create(dtoD);
+        user.driverProfile = createdD;
+        user.driverProfileId = createdD.id;
+      }
+    }
+
+    // Si hay un perfil de backoffice, lo actualizamos
+    if (backOffice) {
+      let dtoB: CreateBackofficeDto = Object.assign(new CreateBackofficeDto(), backOffice as unknown as Partial<CreateBackofficeDto>);
+      dtoB.UserId = user.id;
+      if (user.backOfficeProfileId) {
+        await this.backofficeService.update(user.backOfficeProfileId, dtoB);
+        user.backOfficeProfile = await this.backofficeService.findOne(user.backOfficeProfileId);
+      } else {
+        const createdB = await this.backofficeService.create(dtoB);
+        user.backOfficeProfile = createdB;
+        user.backOfficeProfileId = createdB.id;
+      }
+    }
+
+    await this.userRepository.save(user);
+    return user;
   }
 
-  // Si hay un perfil de conductor, lo actualizamos
-  if (driverProfile) {
-    let dtoD: CreateDriverDto = Object.assign(new CreateDriverDto(), driverProfile as unknown as Partial<CreateDriverDto>);
-    (dtoD as any).userId = user.id;
-    if (user.driverProfileId) {
-      await this.driversService.update(user.driverProfileId, dtoD);
-      user.driverProfile = await this.driversService.findOne(user.driverProfileId);
-    } else {
-      const createdD = await this.driversService.create(dtoD);
-      user.driverProfile = createdD;
-      user.driverProfileId = createdD.id;
-    }
-  }
-
-  // Si hay un perfil de backoffice, lo actualizamos
-  if (backOffice) {
-    let dtoB: CreateBackofficeDto = Object.assign(new CreateBackofficeDto(), backOffice as unknown as Partial<CreateBackofficeDto>);
-    dtoB.UserId = user.id;
-    if (user.backOfficeProfileId) {
-      await this.backofficeService.update(user.backOfficeProfileId, dtoB);
-      user.backOfficeProfile = await this.backofficeService.findOne(user.backOfficeProfileId);
-    } else {
-      const createdB = await this.backofficeService.create(dtoB);
-      user.backOfficeProfile = createdB;
-      user.backOfficeProfileId = createdB.id;
-    }
-  }
-
-  // Guardamos el usuario actualizado
-  await this.userRepository.save(user);
-  return user;
-}
-
-// Método para agregar o eliminar un restaurante favorito
+/**
+ * Permite a los clientes asignar restaurantes como favoritos
+ * @param userId Id del cliente que marca un favorito
+ * @param vendorId Id del restaurante (vendor) marcado
+ * @returns false si no estaba asignado como favorito y se agregó, true si estaba asignado y fue eliminada la relación
+ */
 async toggleFavoriteVendor(userId: number, vendorId: number) {
   const user = await this.userRepository.findOne({
     where: { id: userId },
@@ -268,6 +267,23 @@ async toggleFavoriteVendor(userId: number, vendorId: number) {
       const user = await this.findOne(id)
       if(!user) throw new NotFoundException('No se encontro el usuario a eliminar')
       return this.userRepository.delete(id);
+  }
+
+  /**
+   * Inserta direcciones nuevas en la BD evitando repeticiones
+   * @param address Dirección recibida del front
+   * @returns dirección guardada o recibida en caso de que ya existiera
+   */
+  private async addressInsert(address: string) {
+    address = address.trim()
+    let newAddress = await this.addressRepository.findOne({ where: { street: address } });
+    if (!newAddress) {
+      newAddress = new Address();
+      newAddress.street = address;
+      const createdAddress = this.addressRepository.create(newAddress)
+      newAddress = await this.addressRepository.save(createdAddress);
+    }
+    return newAddress
   }
 
 }

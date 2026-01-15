@@ -8,7 +8,7 @@
       
       <select v-model="role" required>
         <option disabled value="">Selecciona un rol</option>
-        <option value="CLIENT">Usuario</option>
+        <option value="CLIENT">Cliente</option>
         <option value="DRIVER">Conductor</option>
         <option value="VENDOR">Vendedor</option>
       </select>
@@ -26,7 +26,7 @@
         </select>
         <input v-model="licensePlate" type="text" placeholder="Patente / Matrícula" required />
         <input v-model="vehicleBrand" type="text" placeholder="Marca del Vehículo (Ej: Yamaha)" />
-        <input v-model="vehicleModel" type="text" placeholder="Modelo del Vehículo (Ej: FZ 25)" required />
+        <input v-model="vehicleModel" type="text" placeholder="Modelo del Vehículo (Ej: FZ 25)" />
         
         <input v-model="driverLicense" type="text" placeholder="Número de Licencia de Conducir" required />
       </div>
@@ -48,7 +48,6 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
-// Campos Comunes
 const name = ref('');
 const email = ref('');
 const password = ref('');
@@ -76,24 +75,21 @@ const isPhoneNumberValid = (number) => {
 };
 
 const validateFields = () => {
-  errorMessage.value = ''; // Limpiar mensaje de error
+  errorMessage.value = ''; 
   
-  // 1. Validar campos comunes
   if (!name.value || !email.value || !password.value || !role.value) {
     errorMessage.value = 'Debes completar el nombre, email, contraseña y seleccionar un rol.';
     return false;
   }
 
-  // 2. Validar campos específicos del rol
   if (role.value === 'DRIVER') {
     if (phone.value && !isPhoneNumberValid(phone.value)) {
       errorMessage.value = 'El campo Teléfono solo puede contener números y opcionalmente el signo "+".';
       return false;
     }
 
-    // Validar que el resto de campos obligatorios del Driver estén llenos
     if (!phone.value || !vehicleType.value || !licensePlate.value || !vehicleModel.value || !driverLicense.value) {
-      errorMessage.value = 'Como repartidor, debes completar todos los datos personales, del vehículo y la licencia.';
+      errorMessage.value = 'Debes completar todos los datos personales, del vehículo y la licencia.';
       return false;
     }
   } else if (role.value === 'VENDOR') {
@@ -104,7 +100,7 @@ const validateFields = () => {
   }
 
   if(role.value === 'ADMIN'){
-    errorMessage.value = 'No puedes registrarte como admin sin permiso.'
+    errorMessage.value = 'No puedes registrarte como administrador sin permiso.'
     return false
   }
   
@@ -125,7 +121,6 @@ const handleRegister = async () => {
     role: role.value,
   };
 
-// ➕ Agregar campos específicos
   if (role.value === 'DRIVER') {
     Object.assign(userData, {
       driverProfile: {
@@ -145,7 +140,6 @@ const handleRegister = async () => {
         VendorDto: { 
           shopName: storeName.value, 
         },
-        // Si storeAddress es necesario, debe ir en el DTO apropiado (VendorDto o UserDto.address)
       },
     });
   }
