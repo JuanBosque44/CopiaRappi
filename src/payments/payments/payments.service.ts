@@ -59,7 +59,7 @@ export class PaymentsService implements IServiceInterface<Payment, CreatePayment
     if (success && payment.order) {
       payment.order.status = OrderStatus.COMPLETED;
       let updateOrder = new UpdateOrderDto
-      updateOrder.status = payment.order.status
+      /* updateOrder.status = payment.order.status */
       updateOrder.trackingNumber = generateTrackingNumber(payment.order.id)
       await this.orderService.update(payment.order.id, updateOrder);
     }

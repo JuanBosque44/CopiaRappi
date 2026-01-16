@@ -40,6 +40,12 @@ const routes = [
     name: 'user-support',
     component: () => import('../views/UserSupportView.vue'),
   },
+  {
+    path: '/cart',
+    name: 'cart',
+    component: () => import('../views/CartView.vue'),
+    meta: { requiresAuth: true, roles: ['CLIENT', 'ADMIN'] },
+  },
   //Rutas de vendor
   {
     path: '/vendors/:vendorId',

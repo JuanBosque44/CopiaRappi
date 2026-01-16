@@ -24,9 +24,10 @@ export class OrdersController {
         return this.ordersService.findAll(Object.keys(options).length ? options : {});
     }
 
-    @Post('create')
+    @Post()
     @Roles(UserRole.CLIENT)
     create(@Body() body: CreateOrdersDto) {
+        console.log(body)
         return this.ordersService.create(body);
     }
 

@@ -45,20 +45,6 @@
       <button @click="checkout">Finalizar compra</button>
     </div>
 
-    <!-- Ver órdenes -->
-    <!-- <div v-else-if="orders.length">
-      <h3>Mis órdenes:</h3>
-      <div>
-        <ul>
-          <li v-for="order in orders" :key="order.id">
-            Orden #{{ order.id }} - {{ order.status }} - {{ order.total }}$
-          </li>
-        </ul>
-      </div>
-    </div> -->
-    
-    
-
     <!-- Error en carga -->
     <div v-if="error" class="error-message">
       {{ error }}
@@ -85,30 +71,6 @@ const cartTotal = computed(() => {
 });
 
 const user = computed(() => userStore.user);
-
-// Función para cargar las órdenes
-/* const fetchOrders = async () => {
-  if (!user.value) return;
-
-  loading.value = true;
-  error.value = '';
-
-  try {
-    const { data } = await axios.get(
-      `http://localhost:3000/user/${user.value.id}/orders`,
-      {
-        headers: { Authorization: `Bearer ${userStore.token}` },
-      }
-    );
-    orders.value = data || [];
-  } catch (err) {
-    console.error('Error fetching orders:', err);
-    error.value = 'No se pudieron cargar tus órdenes. Intenta nuevamente.';
-    orders.value = [];
-  } finally {
-    loading.value = false;
-  }
-}; */
 
 // Función para buscar restaurantes
 const searchRestaurants = async () => {
@@ -152,15 +114,7 @@ const fetchRestaurants = async () => {
 };
 
 
-// Función para añadir artículos al carrito
-const addToCart = (item) => {
-  const existingItem = cart.value.find(cartItem => cartItem.id === item.id);
-  if (existingItem) {
-    existingItem.quantity += 1;
-  } else {
-    cart.value.push({ ...item, quantity: 1 });
-  }
-};
+
 
 // Función para proceder con la compra
 const checkout = async () => {
@@ -189,7 +143,6 @@ const checkout = async () => {
 
 
 onMounted(() => {
-/*   fetchOrders();*/  
   fetchRestaurants();
 });
 </script>

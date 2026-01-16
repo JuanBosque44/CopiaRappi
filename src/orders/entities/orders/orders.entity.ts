@@ -58,4 +58,7 @@ export class Order {
 
   @Column({ nullable: true })
   vendorId?: number
+
+  @Column({nullable: true})
+  address?: string
 }

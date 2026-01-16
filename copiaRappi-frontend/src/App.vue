@@ -15,12 +15,17 @@
     <main>
       <router-view />
     </main>
+
+<Teleport to="body">
+  <CartFloating />
+</Teleport>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useUserStore } from './store';
+import CartFloating from './components/CartFloating.vue';
 
 const userStore = useUserStore();
 

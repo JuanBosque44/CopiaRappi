@@ -59,7 +59,8 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
 
 
     async create(createOrderDto: CreateOrdersDto): Promise<Order> {
-        const user = await this.userService.findOne(createOrderDto.User.id)
+        console.log(createOrderDto)
+        const user = await this.userService.findOne(createOrderDto.userId)
         if (!user) throw new NotFoundException('Usuario no encontrado');
 
         const orderItems: OrderItem[] = [];
@@ -83,11 +84,12 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
 
 
         const order = this.orderRepository.create({
-            user: user,
+            userId: createOrderDto.userId,
             items: orderItems,
             totalAmount: totalAmount,
             status: OrderStatus.PENDING,
             createdAt: new Date(),
+            address: createOrderDto.address || user.address.street,
         });
 
         const saved = await this.orderRepository.save(order);

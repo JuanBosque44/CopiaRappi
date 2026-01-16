@@ -1,7 +1,4 @@
-import { IsEnum, IsOptional, IsPositive, IsString, IsInt, IsNumber, IsArray, ValidateNested } from "class-validator";
-import { User } from "src/users/entities/user/user.entity";
-import { Driver } from "src/drivers/entities/drivers/driver.entity";
-import { OrderStatus } from "../orders/orders.entity";
+import { IsOptional, IsPositive, IsString, IsInt, IsNumber, IsArray, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { CreatePaymentDto } from "src/payments/payments/dto/create-payment.dto";
 
@@ -17,13 +14,8 @@ class OrderItemDto {
 export class CreateOrdersDto {
 
     @IsOptional()
-    readonly User: User;   
-
-    @IsOptional()
-    readonly driver: Driver;
-     
-    @IsEnum(OrderStatus, { message: 'status must be one of PENDING, IN_PROGRESS, COMPLETED, CANCELLED' })
-    status: OrderStatus;
+    @IsNumber()
+    readonly userId: number;   
 
     @IsNumber()
     @IsPositive({ message: 'El monto total debe ser un número positivo' })
@@ -40,6 +32,10 @@ export class CreateOrdersDto {
     payment?: CreatePaymentDto;
 
     @IsOptional()
-    trackingNumber: string
+    trackingNumber?: string
+
+    @IsOptional()
+    @IsString()
+    address: string
 
 }

@@ -4,8 +4,12 @@ import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '../store/index.js';
 import ProductCard from '../components/ProductCard.vue';
+import { useCartStore } from '../store/cartStore.js';
+
 const userStore = useUserStore();
 const route = useRoute();
+const cartStore = useCartStore();
+const cart = ref(cartStore.items);
 
 const routeValue = Number(route.params.vendorId);
 let vendorsData = ref({});
@@ -21,6 +25,7 @@ const fetchVendor = async () =>{
     try{
         const vendorData = await axios.get('http://localhost:3000/vendors/'+ routeValue, {}, { headers: { Authorization: `Bearer ${userStore.token}` } })
         vendorsData.value = vendorData.data;
+        console.log(vendorsData.value)
     }
     catch(Error){
         console.log('No se ha encontrado el restaurante: '+ Error)
@@ -77,6 +82,15 @@ const deleteReview = async (reviewId) => {
         console.error('Error al eliminar la reseña:', err);
     }
 };
+
+const addToCart = (item) => {
+    const vendor = {
+        id: vendorsData.value.id,
+        shopName: vendorsData.value.shopName
+    }
+    
+    cartStore.addToCart(item, vendor.id, vendor.shopName)
+};
     
 </script>
 
@@ -87,7 +101,7 @@ const deleteReview = async (reviewId) => {
         <h3>Productos:</h3>
         <div v-if="vendorsData.products && vendorsData.products.length > 0">
             <div v-for="product in vendorsData.products" :key="product.id">
-                <ProductCard :product="product" @add-to-cart="$emit('add-to-cart', $event)"></ProductCard>
+                <ProductCard :product="product" @add-to-cart="addToCart(product)"></ProductCard>
             </div>
         </div>
         <div v-else>
@@ -125,7 +139,7 @@ const deleteReview = async (reviewId) => {
                 @click="deleteReview(review.id)">x</span>
                 <p>{{ review.user.name }}</p>
                 <p>Calificación: {{ review.rating }} ★</p>
-                <p>Comentario: {{ review.comment }}</p>
+                <p v-if="review.comment">Comentario: {{ review.comment }}</p>
             </div>
         </div>
         <div v-else>
