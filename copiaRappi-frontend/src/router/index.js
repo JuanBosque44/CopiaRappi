@@ -7,6 +7,9 @@ import UserView from '../views/Clients/UserView.vue';
 import DriverView from '../views/Drivers/DriverView.vue';
 import VendorView from '../views/Vendors/VendorView.vue';
 import UserProfileView from '../views/UserProfileView.vue';
+import OrderConfirmationView from '../views/OrderConfirmationView.vue';
+import PaymentConfirmationView from '../views/PaymentConfirmationView.vue';
+import PaymentsView from '../views/PaymentsView.vue';
 import { useUserStore } from '../store';
 
 const routes = [
@@ -44,6 +47,24 @@ const routes = [
     path: '/cart',
     name: 'cart',
     component: () => import('../views/CartView.vue'),
+    meta: { requiresAuth: true, roles: ['CLIENT', 'ADMIN'] },
+  },
+  {
+    path: '/order-confirmation/:orderId?',
+    name: 'order-confirmation',
+    component: OrderConfirmationView,
+    meta: { requiresAuth: true, roles: ['CLIENT', 'ADMIN'] },
+  },
+  {
+    path: '/payment-confirmation/:orderId/:status',
+    name: 'payment-confirmation',
+    component: PaymentConfirmationView,
+    meta: { requiresAuth: true, roles: ['CLIENT', 'ADMIN'] },
+  },
+  {
+    path: '/payments',
+    name: 'payments',
+    component: PaymentsView,
     meta: { requiresAuth: true, roles: ['CLIENT', 'ADMIN'] },
   },
   //Rutas de vendor

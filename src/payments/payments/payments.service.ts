@@ -45,7 +45,21 @@ export class PaymentsService implements IServiceInterface<Payment, CreatePayment
       user: user,
       amount: createPaymentDto.amount
     });
-    return this.paymentRepository.save(payment)
+    
+    const savedPayment = await this.paymentRepository.save(payment);
+
+    // Actualizar el estado de la orden basado en el estado del pago
+    if (savedPayment && createPaymentDto.orderId) {
+      const newOrderStatus = savedPayment.status === PaymentStatus.COMPLETED 
+        ? OrderStatus.IN_PROGRESS 
+        : OrderStatus.PENDING;
+      
+      await this.orderService.update(createPaymentDto.orderId, {
+        status: newOrderStatus,
+      });
+    }
+
+    return savedPayment;
   }
 
   async confirm(id: number, success: boolean) {
@@ -59,7 +73,7 @@ export class PaymentsService implements IServiceInterface<Payment, CreatePayment
     if (success && payment.order) {
       payment.order.status = OrderStatus.COMPLETED;
       let updateOrder = new UpdateOrderDto
-      /* updateOrder.status = payment.order.status */
+      updateOrder.status = payment.order.status
       updateOrder.trackingNumber = generateTrackingNumber(payment.order.id)
       await this.orderService.update(payment.order.id, updateOrder);
     }

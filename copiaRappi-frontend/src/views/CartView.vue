@@ -35,15 +35,18 @@ const handleCheckout = async () => {
 
     console.log(orderData)
 
-    await axios.post(
+    const response = await axios.post(
       'http://localhost:3000/orders',
       orderData,
       { headers: { Authorization: `Bearer ${userStore.token}` } }
     );
 
-    alert('¡Pedido creado exitosamente!');
+    // Guardar la orden en sesión para la confirmación
+    const orderWithId = { ...orderData, id: response.data.id };
+    sessionStorage.setItem('pendingOrder', JSON.stringify(orderWithId));
+
     cartStore.clearCart();
-    router.push('/user/orders');
+    router.push('/order-confirmation');
   } catch (error) {
     console.error('Error al crear el pedido:', error);
     alert('Error al crear el pedido. Intenta nuevamente.');

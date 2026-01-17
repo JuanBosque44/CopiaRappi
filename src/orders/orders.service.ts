@@ -67,19 +67,22 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
         let totalAmount = 0;
 
         for (const itemDto of createOrderDto.items) {
+            console.log(itemDto)
             const product = await this.productService.findOne(itemDto.productId) as Product
+            console.log(product)
             if (!product) throw new NotFoundException(`Producto no encontrado`);
 
             const subtotal = Number(product.price) * itemDto.quantity;
             totalAmount += subtotal;
 
             const orderItem = this.orderItemRepository.create({
-                productId : product.id,
+                productId : itemDto.productId,
                 quantity: itemDto.quantity,
                 price: product.price,
                 subtotal,
             });
-            orderItems.push(orderItem);
+            const savedItem =  await this.orderItemRepository.save(orderItem);
+            orderItems.push(savedItem);
         }
 
 
@@ -137,11 +140,17 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
 
         if (!order) throw new NotFoundException('Pedido no encontrado');
 
-        console.log('Orden:', order.id);
         console.log('Pagos:', order.payments?.length ? order.payments : 'Sin pagos asociados');
         const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
         const totalAmount = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0); 
 
+        console.log('Items: ', order.items.length ? order.items : 'Sin items asociados');
+        for (const item of order.items) {
+            console.log(`Item ${item.id}: Producto ${item.product ? item.product.name : 'No asociado'}`);
+            if(!item.product) {
+
+            } 
+        }
         const productDto = plainToInstance(
             ProductRequestDto,
             (order.items || []).map(p => ({
