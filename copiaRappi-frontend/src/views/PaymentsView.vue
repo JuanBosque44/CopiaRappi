@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useUserStore } from '../store/index.js';
+import { useUserStore } from '../store/userStore.js';
 import { usePaymentStore } from '../store/paymentStore.js';
 import { useRouter } from 'vue-router';
 

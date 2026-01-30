@@ -10,7 +10,7 @@ import UserProfileView from '../views/UserProfileView.vue';
 import OrderConfirmationView from '../views/OrderConfirmationView.vue';
 import PaymentConfirmationView from '../views/PaymentConfirmationView.vue';
 import PaymentsView from '../views/PaymentsView.vue';
-import { useUserStore } from '../store';
+import { useUserStore } from '../store/userStore.js';
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },

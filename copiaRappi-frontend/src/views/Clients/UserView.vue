@@ -14,7 +14,7 @@
       <div v-if="searchResults.length > 0" class="vendors-grid">
         <div v-for="restaurant in searchResults" :key="restaurant.id">
           <div v-if="restaurant.shopName !== 'sin nombre'">
-            <VendorCard :vendor="restaurant"></VendorCard>
+            <VendorCard :vendor="restaurant" :is-favorite="favoriteStore.isVendorFavorite(restaurant.id) ? true : false"></VendorCard>
           </div>
         </div>
       </div>
@@ -54,11 +54,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useUserStore } from '../../store';
+import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import VendorCard from '../../components/VendorCard.vue';
+import { useFavoriteStore } from '../../store/favoriteStore.js';
 
 const userStore = useUserStore();
+const favoriteStore = useFavoriteStore();
 const orders = ref([]);
 const error = ref('');
 const loading = ref(false);
@@ -71,11 +73,13 @@ const cartTotal = computed(() => {
 });
 
 const user = computed(() => userStore.user);
+const favorite = ref([]);
 
 // Función para buscar restaurantes
 const searchRestaurants = async () => {
   if (!searchQuery.value) {
     fetchRestaurants();
+    getFavoriteVendors();
     return;
   }
 
@@ -113,6 +117,17 @@ const fetchRestaurants = async () => {
   }
 };
 
+const getFavoriteVendors = async () => {
+    try {
+        favoriteStore.favoriteVendors = await favoriteStore.fetchFavoriteVendors(client.id, userStore.token);
+        favorite.value = favoriteStore.favoriteVendors;
+        return favorite.value;
+    } catch (err) {
+        console.error('Error al obtener restaurantes favoritos:', err);
+        return [];
+    }
+};
+
 
 
 
@@ -132,8 +147,8 @@ const checkout = async () => {
     const { data } = await axios.post('http://localhost:3000/orders', orderData, {
       headers: { Authorization: `Bearer ${userStore.token}` },
     });
-    orders.value.push(data); // Añadimos la nueva orden a las órdenes
-    cart.value = []; // Limpiamos el carrito
+    orders.value.push(data); 
+    cart.value = []; 
   } catch (err) {
     console.error('Error realizando la compra:', err);
     error.value = 'No se pudo realizar la compra. Intenta nuevamente.';

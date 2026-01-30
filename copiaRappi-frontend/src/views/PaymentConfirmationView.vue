@@ -1,15 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '../store/index.js';
-import { usePaymentStore } from '../store/paymentStore.js';
+
 
 const route = useRoute();
 const router = useRouter();
-const userStore = useUserStore();
-const paymentStore = usePaymentStore();
 
-const isLoading = ref(false);
 const paymentStatus = ref(null);
 const orderId = ref(null);
 

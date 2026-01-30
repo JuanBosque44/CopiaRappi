@@ -27,7 +27,7 @@
 
       <ul v-if="user.role === 'CLIENT'">
         <h2>Negocios Favoritos</h2>
-        <span v-if="favoriteVendors.length === 0" class="error-message">No hay restaurantes marcados como favoritos</span>
+        <span v-if="favoriteVendors?.length === 0" class="error-message">No hay restaurantes marcados como favoritos</span>
         <li v-for="vendor in favoriteVendors" :key="vendor.id">
           {{ vendor.shopName }}
           <button @click="toggleFavorite(vendor.id)" :disabled="loadingFavorites" class="right-side-btn">
@@ -55,12 +55,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useUserStore } from '../store';
+import { useUserStore } from '../store/userStore.js';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useFavoriteStore } from '../store/favoriteStore';
 
 const userStore = useUserStore();
 const router = useRouter();
+const favoriteStore = useFavoriteStore();
 
 const user = computed(() => userStore.user);
 const name = ref(user.value?.name || '');
@@ -147,10 +149,9 @@ const getAvailable = async () => {
 const toggleFavorite = async (vendorId) => {
   loadingFavorites.value = true;
   try {
-    await axios.put(`http://localhost:3000/user/${user.value.id}/favorites/${vendorId}`, {}, authHeaders());
-    favoriteVendors.value = favoriteVendors.value.map(v =>
-      v.id === vendorId ? { ...v, isFavorite: !v.isFavorite } : v
-    );
+    console.log('Toggling favorite for vendor ID:', vendorId , 'and user ID:', user.value.id);
+    await favoriteStore.toggleFavoriteVendor(vendorId, user.value.id, userStore.token);
+    favoriteVendors.value = favoriteStore.favoriteVendors;
   } catch (err) {
     console.error('Error al actualizar favorito:', err);
     alert('No se pudo actualizar el favorito');
@@ -160,11 +161,23 @@ const toggleFavorite = async (vendorId) => {
 };
 
 const fetchFavoriteVendors = async () => {
+  loadingFavorites.value = true;
   try {
-    const res = await axios.get(`http://localhost:3000/user/${user.value.id}/favorites`, authHeaders());
-    favoriteVendors.value = res.data.favoriteVendors;
+    if(favoriteStore.favoriteVendors?.length !== 0) {
+      if(localStorage.getItem('favoriteVendors')) {
+        favoriteStore.favoriteVendors = JSON.parse(localStorage.getItem('favoriteVendors'));
+        favoriteVendors.value = favoriteStore.favoriteVendors;
+      } else {
+        favoriteStore.favoriteVendors = await favoriteStore.fetchFavoriteVendors(user.value.id, userStore.token);
+        favoriteVendors.value = favoriteStore.favoriteVendors;
+        console.log('Favorite vendors loaded from store:', favoriteVendors.value);
+      }
+    }
   } catch (err) {
     console.error('Error al cargar restaurantes favoritos:', err);
+  }
+  finally {
+    loadingFavorites.value = false;
   }
 };
 

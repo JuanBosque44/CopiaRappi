@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { useUserStore } from '../store/index.js';
+import { useUserStore } from '../store/userStore.js';
 import ProductCard from '../components/ProductCard.vue';
 import { useCartStore } from '../store/cartStore.js';
 

@@ -44,7 +44,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '../../store';
+import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 
 const userStore = useUserStore();

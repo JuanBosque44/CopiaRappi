@@ -1,14 +1,20 @@
 <script setup>
-import { defineProps, onMounted, ref } from 'vue';
-import axios from 'axios';
-import { useUserStore } from '../store/index.js';
+import { computed, defineProps, onMounted, ref } from 'vue';
+import { useUserStore } from '../store/userStore.js';
+import { useFavoriteStore } from '../store/favoriteStore.js';
 
 const userStore = useUserStore();
+const favoriteStore = useFavoriteStore();
 let { vendor } = 
 defineProps({
     vendor: {
         type: Object,
         required: true
+    },
+    isFavorite: {
+        type: Boolean,
+        required: false,
+        default: false
     }
 });
 
@@ -18,7 +24,9 @@ let classFavorite = ref('')
 
 onMounted(() => {
     averageCalculated()
-    getFavoriteVendors();
+    const isFavorite = computed(() => favoriteStore.isVendorFavorite(vendor.id)).value;
+    if(!isFavorite) classFavorite.value = 'fav'
+    else classFavorite.value = 'fav-added'
 });
 
 
@@ -37,31 +45,13 @@ const averageCalculated = () => {
 
 const toggleFavoriteVendor = async () => {
     try {
-        const state = await axios.put(
-        `http://localhost:3000/user/${client.id}/favorites/${vendor.id}`,
-        {},
-        { headers: { Authorization: `Bearer ${userStore.token}` } }
-        );
-        if(state.data) classFavorite.value = 'fav'
-        else classFavorite.value = 'fav-added'
+        await favoriteStore.toggleFavorite(vendor.id, client.id, userStore.token);
+        const isFavorite = computed(() => favoriteStore.isVendorFavorite(vendor.id)).value;
+        console.log("Es favorito: ", isFavorite);
+        if(isFavorite) classFavorite.value = 'fav-added'
+        else classFavorite.value = 'fav'
     } catch (err) {
         console.error('Error al marcar restaurante como favorito:', err);
-    }
-};
-
-const getFavoriteVendors = async () => {
-    try {
-        const { data } = await axios.get(
-        `http://localhost:3000/user/${client.id}/favorites`,
-        { headers: { Authorization: `Bearer ${userStore.token}` } }
-        );
-        const favoriteVendors = data.favoriteVendors || [];
-        const isFav = favoriteVendors.some(v => v.id === vendor.id);
-        classFavorite.value = isFav ? 'fav-added' : 'fav';
-        return favoriteVendors;
-    } catch (err) {
-        console.error('Error al obtener restaurantes favoritos:', err);
-        return [];
     }
 };
 

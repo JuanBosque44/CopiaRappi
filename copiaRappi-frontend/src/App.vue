@@ -24,7 +24,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { useUserStore } from './store';
+import { useUserStore } from './store/userStore.js';
 import CartFloating from './components/CartFloating.vue';
 
 const userStore = useUserStore();

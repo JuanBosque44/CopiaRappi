@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useUserStore } from '../store';
+import { useUserStore } from '../store/userStore.js';
 import { useRouter } from 'vue-router';
 
 const email = ref('');

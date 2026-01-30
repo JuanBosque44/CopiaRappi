@@ -1,6 +1,6 @@
 <script setup>
 import { useCartStore } from '../store/cartStore.js';
-import { useUserStore } from '../store/index.js';
+import { useUserStore } from '../store/userStore.js';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useUserStore } from '../store/index.js';
+import { useUserStore } from '../store/userStore.js';
 import { usePaymentStore } from '../store/paymentStore.js';
 import axios from 'axios';
 

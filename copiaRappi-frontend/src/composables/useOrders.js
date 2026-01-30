@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import axios from 'axios';
-import { useUserStore } from '../store';
+import { useUserStore } from '../store/userStore.js';
 
 export function useOrders() {
   const userStore = useUserStore();

@@ -100,7 +100,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useUserStore } from '../../store';
+import { useUserStore } from '../../store/userStore.js';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 

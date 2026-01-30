@@ -19,6 +19,7 @@ import { PaginatedResult } from 'src/shared/interfaces/paginatedResult.type';
 import { paginate } from 'src/shared/utils/pagination';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './entities/dto/user-response.dto';
+import { UserFavoriteVendorResponseDto } from './entities/dto/user-favoriteVendor-response.dto';
 
 @Injectable()
 export class UsersService implements IServiceInterface<User, CreateUserDto, UpdateUserDto, UserResponseDto> {
@@ -57,13 +58,20 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
       return user;
   }
 
-  findClient(clientData: ClientDataDto): Promise<User | null> {
-    const user = this.userRepository.findOne({
+  async findClient(clientData: ClientDataDto): Promise<UserFavoriteVendorResponseDto[] | null> {
+    const user = await this.userRepository.findOne({
         where: { id: clientData.id, role: clientData.role },
         relations: ['address', 'favoriteVendors', 'reviews'],
     });
     if(!user) throw new NotFoundException('No se ha encontrado al cliente')
-    return user
+    let userFavoriteVendors = new Array<UserFavoriteVendorResponseDto>();
+    for (const vendor of (await user).favoriteVendors) {
+      const userFavoriteVendor = new UserFavoriteVendorResponseDto();
+      userFavoriteVendor.id = vendor.id;
+      userFavoriteVendor.shopName = vendor.shopName;
+      userFavoriteVendors.push(userFavoriteVendor);
+    }
+    return userFavoriteVendors;
   }
 
   async findByEmail(email: string) {

@@ -12,7 +12,7 @@
 
 <script setup>
 import { onMounted, computed } from 'vue';
-import { useUserStore } from '../../store';
+import { useUserStore } from '../../store/userStore.js';
 import DriverLayoutView from '../../layouts/DriverLayoutView.vue';
 import OrderCard from '../../components/OrderCard.vue';
 import { useOrders } from '../../composables/useOrders.js';
