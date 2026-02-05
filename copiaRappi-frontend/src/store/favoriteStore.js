@@ -35,7 +35,7 @@ export const useFavoriteStore = defineStore('favorite', {
     async toggleFavorite(vendorId, user, token) {
         try {
             const response = await axios.put(`http://localhost:3000/user/${user}/favorites/${vendorId}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-            if(response.data === false){
+            if(response.data === true){
                 this.favoriteVendors = this.favoriteVendors.filter(vendor => vendor.id !== vendorId);
                 localStorage.setItem('favorites', JSON.stringify(this.favoriteVendors));
             } else {

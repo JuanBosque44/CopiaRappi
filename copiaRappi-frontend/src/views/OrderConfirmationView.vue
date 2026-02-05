@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '../store/userStore.js';
 import { usePaymentStore } from '../store/paymentStore.js';
@@ -17,7 +17,6 @@ const isExistingOrder = ref(false);
 
 // Obtener datos de la orden de sessionStorage, route params o API
 const initializeOrder = async () => {
-  // Caso 1: Orden nueva (desde sessionStorage)
   const storedOrder = sessionStorage.getItem('pendingOrder');
   if (storedOrder) {
     orderData.value = JSON.parse(storedOrder);
@@ -25,8 +24,7 @@ const initializeOrder = async () => {
     return;
   }
 
-  // Caso 2: Orden existente (desde ruta /order-confirmation/:orderId)
-  if (route.params.orderId) {
+  if (route.params.orderId && !storedOrder) {
     isExistingOrder.value = true;
     isLoading.value = true;
     try {
@@ -49,16 +47,23 @@ const initializeOrder = async () => {
   router.push('/user/orders');
 };
 
+const isAvailableForPayment = computed(() => {
+  if (!orderData.value || !orderData.value.items || orderData.value.items.length === 0) return false;
+  return orderData.value.totalAmount > 0 ? true : false;
+});
+
 const totalWithFees = computed(() => {
   if (!orderData.value) return 0;
-  const subtotal = orderData.value.totalAmount;
+  const subtotal = Number(orderData.value.totalAmount);
   const shipping = 5.00;
   const taxes = subtotal * 0.1;
-  return (subtotal + shipping + taxes).toFixed(2);
+  const total = subtotal + shipping + taxes;
+  return Number(total)
 });
 
 const handleProceedToPayment = () => {
   showPaymentForm.value = true;
+  
 };
 
 const handlePayLater = async () => {
@@ -66,7 +71,6 @@ const handlePayLater = async () => {
   
   isLoading.value = true;
   try {
-    // Limpiar sesión solo si es orden nueva
     if (!isExistingOrder.value) {
       sessionStorage.removeItem('pendingOrder');
     }
@@ -87,6 +91,7 @@ const handlePaymentSuccess = async (paymentResponse) => {
       sessionStorage.removeItem('pendingOrder');
     }
     router.push({
+      path: '/payment/confirmation',
       name: 'payment-confirmation',
       params: { orderId: orderData.value.id, status: 'success' }
     });
@@ -104,11 +109,12 @@ const handleBackToCart = () => {
   if (isExistingOrder.value) {
     router.push('/user/orders');
   } else {
-    router.push('/');
+    router.push('/cart');
   }
 };
 
 const formatDate = (dateString) => {
+  if(!dateString) return new Date().toLocaleDateString('es-ES');
   const date = new Date(dateString);
   return date.toLocaleDateString('es-ES', {
     year: 'numeric',
@@ -137,12 +143,12 @@ initializeOrder();
 
           <div class="order-details">
             <div class="detail-row">
-              <span class="label">ID de Pedido:</span>
-              <span class="value">#{{ orderData.id }}</span>
+              <span class="label">Número de Pedido:</span>
+              <span class="value">#{{ orderData.id || route.params.orderId }}</span>
             </div>
             <div class="detail-row">
               <span class="label">Estado:</span>
-              <span class="status-badge" :class="isExistingOrder ? orderData.status.toLowerCase() : 'pending'">
+              <span class="status-badge" :class="isExistingOrder ? orderData.status.toLowerCase() : 'Pendiente'">
                 {{ isExistingOrder ? orderData.status : 'Pendiente de Pago' }}
               </span>
             </div>
@@ -165,7 +171,7 @@ initializeOrder();
           <div class="pricing-summary">
             <div class="price-row">
               <span>Subtotal:</span>
-              <span>${{ orderData.totalAmount.toFixed(2) }}</span>
+              <span>${{ orderData.totalAmount }}</span>
             </div>
             <div class="price-row">
               <span>Envío:</span>
@@ -177,7 +183,7 @@ initializeOrder();
             </div>
             <div class="price-row total">
               <span>Total a Pagar:</span>
-              <span>${{ totalWithFees }}</span>
+              <span>${{ (totalWithFees * 1).toFixed(2) }}</span>
             </div>
           </div>
 
@@ -201,7 +207,7 @@ initializeOrder();
             <button 
               @click="handleProceedToPayment" 
               class="btn-primary"
-              :disabled="isLoading"
+              :disabled="isLoading || !isAvailableForPayment"
             >
               💳 Pagar Ahora
             </button>
@@ -210,7 +216,7 @@ initializeOrder();
               v-if="!isExistingOrder"
               @click="handlePayLater" 
               class="btn-secondary"
-              :disabled="isLoading"
+              :disabled="isLoading || !isAvailableForPayment"
             >
               ⏰ Pagar Después
             </button>
@@ -225,7 +231,7 @@ initializeOrder();
           </div>
 
           <div class="info-box">
-            <p v-if="!isExistingOrder">
+            <p v-if="!isExistingOrder && isAvailableForPayment">
               <strong>💡 Nota:</strong> Puedes pagar ahora o completar tu pedido y pagar después. 
               Si pagas después, tendrás 24 horas para completar el pago.
             </p>

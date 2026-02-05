@@ -31,7 +31,7 @@
         <li v-for="vendor in favoriteVendors" :key="vendor.id">
           {{ vendor.shopName }}
           <button @click="toggleFavorite(vendor.id)" :disabled="loadingFavorites" class="right-side-btn">
-            {{ vendor.isFavorite ? 'Agregar' : 'Quitar' }}
+            Quitar
           </button>
         </li>
       </ul>
@@ -70,8 +70,7 @@ const email = ref(user.value?.email || '');
 const address = ref(user.value?.address?.street || '');
 const password = ref('');
 
-const orders = ref([]);
-const ordersError = ref('');
+
 const favoriteVendors = ref([]);
 
 const profileMessage = ref('');
@@ -88,19 +87,15 @@ onMounted(async () => {
 
   if (user.value.role === 'CLIENT') {
     try {
-      const res = await axios.get(`http://localhost:3000/user/${user.value.id}/orders`, authHeaders());
-      orders.value = res.data;
-      fetchFavoriteVendors();
+      await fetchFavoriteVendors();
     } catch (err) {
-      console.error('Error al cargar órdenes:', err);
-      ordersError.value = err.response?.data?.message || 'No se pudieron cargar las órdenes';
+      console.error('Error al cargar favoritos:', err);
     }
   }
 
   if (user.value.role === 'DRIVER') {
     await getAvailable();
   }
-
 });
 
 const updateProfile = async () => {
@@ -150,8 +145,8 @@ const toggleFavorite = async (vendorId) => {
   loadingFavorites.value = true;
   try {
     console.log('Toggling favorite for vendor ID:', vendorId , 'and user ID:', user.value.id);
-    await favoriteStore.toggleFavoriteVendor(vendorId, user.value.id, userStore.token);
-    favoriteVendors.value = favoriteStore.favoriteVendors;
+    await favoriteStore.toggleFavorite(vendorId, user.value.id, userStore.token);
+    favoriteVendors.value = favoriteVendors.value.filter(vendor => vendor.id !== vendorId);
   } catch (err) {
     console.error('Error al actualizar favorito:', err);
     alert('No se pudo actualizar el favorito');

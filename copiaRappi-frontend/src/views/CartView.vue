@@ -9,8 +9,9 @@ const cartStore = useCartStore();
 const userStore = useUserStore();
 const router = useRouter();
 const isLoading = ref(false);
-const deliveryAddress = ref(userStore.user.address.street);
+const deliveryAddress = ref('');
 const deliveryPhone = ref('');
+let deliveryCost = ref(5)
 
 console.log(cartStore)
 
@@ -107,7 +108,7 @@ const handleContinueShopping = () => {
             </div>
             <div class="summary-row">
               <span>Envío:</span>
-              <span>$5.00</span>
+              <span>${{ deliveryCost }}</span>
             </div>
             <div class="summary-row">
               <span>Impuestos:</span>
@@ -115,7 +116,7 @@ const handleContinueShopping = () => {
             </div>
             <div class="summary-row total">
               <span>Total:</span>
-              <span>${{ (parseFloat(cartStore.cartTotal) + 5 + cartStore.cartSubtotal * 0.1).toFixed(2) }}</span>
+              <span>${{ (parseFloat(cartStore.cartTotal) + deliveryCost + cartStore.cartSubtotal * 0.1).toFixed(2) }}</span>
             </div>
           </div>
 
@@ -151,8 +152,8 @@ const handleContinueShopping = () => {
     </div>
 
     <div v-else class="empty-cart">
-      <p class="empty-message">📦 Tu carrito está vacío</p>
-      <router-link to="/" class="btn-continue">Buscar Restaurantes</router-link>
+      <p class="empty-message"> Tu carrito está vacío</p>
+      <router-link to="/user" class="btn-continue">Buscar Restaurantes</router-link>
     </div>
   </div>
 </template>

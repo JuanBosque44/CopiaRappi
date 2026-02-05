@@ -45,8 +45,10 @@ const averageCalculated = () => {
 
 const toggleFavoriteVendor = async () => {
     try {
+        let favoriteNow = await computed(() => favoriteStore.isVendorFavorite(vendor.id)).value;
+        console.log("Antes de toggle, es favorito: ", favoriteNow);
         await favoriteStore.toggleFavorite(vendor.id, client.id, userStore.token);
-        const isFavorite = computed(() => favoriteStore.isVendorFavorite(vendor.id)).value;
+        const isFavorite = await computed(() => favoriteStore.isVendorFavorite(vendor.id)).value;
         console.log("Es favorito: ", isFavorite);
         if(isFavorite) classFavorite.value = 'fav-added'
         else classFavorite.value = 'fav'
@@ -114,6 +116,16 @@ const toggleFavoriteVendor = async () => {
     border: none;
     cursor: pointer;
     background-color: red;
+}
+
+.vendor-card .fav:hover {
+    background-color: darkorange;
+    transition: background-color 0.3s ease;
+}
+
+.vendor-card .fav-added:hover {
+    background-color: darkred;
+    transition: background-color 0.3s ease;
 }
 
 .vendor-card .calificacion {

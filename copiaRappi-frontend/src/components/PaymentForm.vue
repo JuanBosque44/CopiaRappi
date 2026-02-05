@@ -147,7 +147,7 @@ const handlePayment = async () => {
       true,
       userStore.token
     ); */
-    emit('payment-saved', response);
+    emit('payment-success', response);
   } catch (error) {
     console.error('Payment error:', error);
     emit('payment-error', error.message || 'Error al procesar el pago');
@@ -164,12 +164,11 @@ const handleCancel = () => {
 <template>
   <div class="payment-form-container">
     <div class="form-header">
-      <h2>💳 Formulario de Pago</h2>
+      <h2>Formulario de Pago</h2>
       <button @click="handleCancel" class="btn-close">✕</button>
     </div>
 
     <form @submit.prevent="handlePayment" class="payment-form">
-      <!-- Monto a pagar -->
       <div class="amount-section">
         <div class="amount-card">
           <span class="amount-label">Total a Pagar:</span>
@@ -307,7 +306,6 @@ const handleCancel = () => {
         </div>
       </template>
 
-      <!-- Información de seguridad -->
       <div class="security-info">
         <p>🔒 Tu información de pago está protegida y encriptada</p>
       </div>

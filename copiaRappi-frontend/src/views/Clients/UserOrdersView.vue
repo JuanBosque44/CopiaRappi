@@ -1,7 +1,7 @@
 <template>
 <div class="orders-container">
   <div class="orders-header">
-    <h1>📦 Mis Órdenes</h1>
+    <h1>Mis Órdenes</h1>
     <p>Historial y estado de tus pedidos</p>
   </div>
 
@@ -67,24 +67,21 @@
           @click="goToOrderDetails(order.id)"
           class="btn-action btn-view"
         >
-          👁️ Ver Detalles
+          Ver Detalles
         </button>
 
         <button 
-          v-if="needsPayment(order)"
+          v-if="needsPayment(order) && order.status === 'PENDING'"
           @click="goToPayment(order.id)"
           class="btn-action btn-pay"
         >
-          💳 Pagar Ahora
+          Pagar Ahora
         </button>
-
-        <button 
-          v-else
-          @click="goToOrderDetails(order.id)"
-          class="btn-action btn-secondary"
+        <div
+          v-else-if="order.status === 'COMPLETED' || order.status === 'DELIVERED' || order.status === 'IN_PROGRESS'"
         >
-          📋 Más Info
-        </button>
+          <span class="blocked">Ya pagado</span>
+        </div>
       </div>
     </div>
   </div>
@@ -129,7 +126,7 @@ const formatDate = (dateString) => {
 const getStatusLabel = (status) => {
   const labels = {
     PENDING: '⏳ Pendiente',
-    PROCESSING: '🔄 En Proceso',
+    IN_PROGRESS: '🔄 En Proceso',
     COMPLETED: '✅ Completada',
     CANCELLED: '❌ Cancelada',
     DELIVERED: '🚪 Entregada',
@@ -142,15 +139,23 @@ const getStatusClass = (status) => {
 };
 
 const getPaymentStatusLabel = (order) => {
-  // Si tiene un pago completado
+
   if (order.payment && order.payment.status === 'COMPLETED') {
     return '✓ Pagado';
   }
-  // Si tiene un pago pendiente
+
   if (order.payment && order.payment.status === 'PENDING') {
     return '⏳ Pago Pendiente';
   }
-  // Si no tiene pago registrado
+
+  if(order.payment && order.payment.status === 'FAILED') {
+    return '❌ Pago Fallido';
+  }
+
+  if(order.payment && order.payment.status === 'REFUNDED') {
+    return '💸 Reembolsado';
+  }
+
   return '❌ Sin Pago';
 };
 
@@ -165,15 +170,20 @@ const getPaymentStatusClass = (order) => {
 };
 
 const needsPayment = (order) => {
-  return !order.payment || order.payment.status !== 'COMPLETED';
+  return (!order.payment || order.payment.status !== 'COMPLETED') && order.status !== 'CANCELLED';
 };
 
 const goToPayment = (orderId) => {
+  const order = orders.value.find(o => o.id === orderId);
+  if (!order) return;
+  sessionStorage.setItem('pendingOrder', JSON.stringify(order));
   router.push(`/order-confirmation/${orderId}`);
 };
 
 const goToOrderDetails = (orderId) => {
-  // Si tenemos una ruta de detalles, usarla, si no simplemente ir a pagos
+  const order = orders.value.find(o => o.id === orderId);
+  if (!order) return;
+  sessionStorage.setItem('pendingOrder', JSON.stringify(order));
   router.push(`/order-confirmation/${orderId}`);
 };
 
@@ -194,6 +204,7 @@ const loadOrders = async () => {
         authHeaders()
       );
       orders.value = res.data;
+      orders.value.sort((a, b) => a.id - b.id);
     }
   } catch (err) {
     console.error('Error al cargar órdenes:', err);
@@ -470,17 +481,6 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(66, 184, 131, 0.3);
 }
 
-.btn-secondary {
-  background-color: #e8f5e9;
-  color: #42b883;
-  border: 2px solid #42b883;
-  grid-column: 2;
-}
-
-.btn-secondary:hover {
-  background-color: #c8e6c9;
-}
-
 .btn-continue-shopping {
   display: inline-block;
   padding: 12px 24px;
@@ -494,6 +494,17 @@ onMounted(() => {
 
 .btn-continue-shopping:hover {
   background-color: #369870;
+}
+
+.blocked {
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  padding: 10px 12px;
+
 }
 
 /* Footer */
@@ -535,6 +546,7 @@ onMounted(() => {
 .btn-retry:hover {
   background-color: #369870;
 }
+
 
 @media (max-width: 768px) {
   .orders-grid {

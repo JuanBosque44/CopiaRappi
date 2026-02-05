@@ -121,7 +121,7 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
 
     async findByUserId(userId: number): Promise<Order[]> {
         const orders = this.orderRepository.find({
-            where: { user: { id: userId } },
+            where: { userId },
             relations: ['user'],
         });
         if(!orders) throw new NotFoundException('No se han encontrado ordenes pertenecientes al usuario')
