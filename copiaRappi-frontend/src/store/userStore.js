@@ -39,6 +39,9 @@ export const useUserStore = defineStore('user', {
       this.user = null;
       this.token = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('favorites');  
+      localStorage.removeItem('cart');       
     },
   },
 });

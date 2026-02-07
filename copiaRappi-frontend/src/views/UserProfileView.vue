@@ -159,13 +159,14 @@ const fetchFavoriteVendors = async () => {
   loadingFavorites.value = true;
   try {
     if(favoriteStore.favoriteVendors?.length !== 0) {
-      if(localStorage.getItem('favoriteVendors')) {
-        favoriteStore.favoriteVendors = JSON.parse(localStorage.getItem('favoriteVendors'));
+      if(localStorage.getItem('favorites')) {
+        favoriteStore.favoriteVendors = JSON.parse(localStorage.getItem('favorites'));
+        console.log('Favorite vendors loaded from localStorage');
         favoriteVendors.value = favoriteStore.favoriteVendors;
       } else {
         favoriteStore.favoriteVendors = await favoriteStore.fetchFavoriteVendors(user.value.id, userStore.token);
         favoriteVendors.value = favoriteStore.favoriteVendors;
-        console.log('Favorite vendors loaded from store:', favoriteVendors.value);
+        console.log('Favorite vendors loaded from store');
       }
     }
   } catch (err) {
@@ -173,6 +174,9 @@ const fetchFavoriteVendors = async () => {
   }
   finally {
     loadingFavorites.value = false;
+    if (favoriteVendors.value?.length === 0 || !favoriteVendors.value) {
+      console.log('No hay restaurantes favoritos para este usuario');
+    }
   }
 };
 

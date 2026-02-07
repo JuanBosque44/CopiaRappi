@@ -119,8 +119,16 @@ const fetchRestaurants = async () => {
 
 const getFavoriteVendors = async () => {
     try {
-        favoriteStore.favoriteVendors = await favoriteStore.fetchFavoriteVendors(client.id, userStore.token);
-        favorite.value = favoriteStore.favoriteVendors;
+        if (localStorage.getItem('favorites')) {
+          favoriteStore.favoriteVendors = JSON.parse(localStorage.getItem('favorites'));
+          console.log('Favorite vendors loaded from localStorage');
+          favorite.value = favoriteStore.favoriteVendors;
+        }
+        else {
+          favoriteStore.favoriteVendors = await favoriteStore.fetchFavoriteVendors(client.id, userStore.token);
+          console.log('Favorite vendors loaded from store');
+          favorite.value = favoriteStore.favoriteVendors;
+        }
         return favorite.value;
     } catch (err) {
         console.error('Error al obtener restaurantes favoritos:', err);

@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useUserStore } from '../store/userStore.js';
-import { usePaymentStore } from '../store/paymentStore.js';
+import { useUserStore } from '../../store/userStore.js';
+import { usePaymentStore } from '../../store/paymentStore.js';
 import axios from 'axios';
 
 const router = useRouter();
@@ -260,7 +260,7 @@ initializeOrder();
 </template>
 
 <script>
-import PaymentForm from '../components/PaymentForm.vue';
+import PaymentForm from '../../components/PaymentForm.vue';
 
 export default {
   components: {

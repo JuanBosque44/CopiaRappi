@@ -7,8 +7,8 @@ import UserView from '../views/Clients/UserView.vue';
 import DriverView from '../views/Drivers/DriverView.vue';
 import VendorView from '../views/Vendors/VendorView.vue';
 import UserProfileView from '../views/UserProfileView.vue';
-import OrderConfirmationView from '../views/OrderConfirmationView.vue';
-import PaymentConfirmationView from '../views/PaymentConfirmationView.vue';
+import OrderConfirmationView from '../views/Clients/OrderConfirmationView.vue';
+import PaymentConfirmationView from '../views/Clients/PaymentConfirmationView.vue';
 import PaymentsView from '../views/PaymentsView.vue';
 import { useUserStore } from '../store/userStore.js';
 
@@ -17,7 +17,7 @@ const routes = [
   { path: '/login', name: 'login', component: LoginView },
   { path: '/register', name: 'register', component: RegisterView },
 
-  // Rutas por rol
+  // Rutas de admin
   {
     path: '/admin',
     name: 'admin',
@@ -46,7 +46,7 @@ const routes = [
   {
     path: '/cart',
     name: 'cart',
-    component: () => import('../views/CartView.vue'),
+    component: () => import('../views/Clients/CartView.vue'),
     meta: { requiresAuth: true, roles: ['CLIENT', 'ADMIN'] },
   },
   {
