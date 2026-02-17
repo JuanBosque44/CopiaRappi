@@ -4,14 +4,14 @@
         <VendorLayoutView />
         <!-- PRODUCTOS -->
         <section>
-          <h3>Productos</h3>
+          <h3>Mis Productos</h3>
           <div v-if="loadingProducts">Cargando productos...</div>
           <ul v-else-if="products.length">
             <li v-for="p in products" :key="p.id">
               {{ p.name }} — ${{ Number(p.price).toFixed(2) }}
               <span v-if="p.discount"> (Promo: ${{ Number(p.discount).toFixed(2) }})</span>
               <span class="category-badge">{{ getCategoryName(p.categoryId) }}</span>
-              <button @click="toggleProductActive(p.id)">
+              <button @click="toggleProductActive(p.id)" :class="changeColor(p.isActive)">
                 {{ p.isActive ? 'Desactivar' : 'Activar' }}
               </button>
               <button @click="editProduct(p)">Editar</button>
@@ -46,7 +46,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { useUserStore } from '../../store';
+import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import VendorLayoutView from '../../layouts/VendorLayoutView.vue';
 
@@ -221,6 +221,10 @@ const resetProductForm = () => {
   });
 };
 
+const changeColor = (isActive) => {
+  return isActive ? 'btn-active' : 'btn-inactive';
+};
+
 /* =====================
    Lifecycle
 ===================== */
@@ -261,6 +265,16 @@ section {
 
 .product-actions button {
   margin-right: 0.5rem;
+}
+
+.btn-active {
+  background-color: #42b883;
+  color: white;
+}
+
+.btn-inactive {
+  background-color: #ccc;
+  color: #666;
 }
 
 ul { list-style: none; padding: 0; }

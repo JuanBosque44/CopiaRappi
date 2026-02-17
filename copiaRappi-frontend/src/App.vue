@@ -16,7 +16,7 @@
       <router-view />
     </main>
 
-<Teleport to="body">
+<Teleport to="body" v-if="user && user.role === 'CLIENT'">
   <CartFloating />
 </Teleport>
   </div>

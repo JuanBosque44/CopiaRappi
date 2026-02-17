@@ -15,11 +15,9 @@
           <input v-model="password" type="password" placeholder="Contraseña" />
         -->
         <input v-if="user.role === 'CLIENT'" v-model="address" type="text" placeholder="Dirección">
-        <!-- <div v-if="user.role === 'DRIVER'">
-          <input type="text" :value="user.driverProfile" disabled placeholder="Teléfono" />
-          <input type="text" :value="user.driverProfile" disabled placeholder="Información del Vehículo" />
-          <input type="text"  disabled placeholder="Placa del Vehículo" />
-        </div> -->
+        <div v-if="user.role === 'DRIVER'">
+          <DriverForm v-model:phone="phone" v-model:vehicleType="vehicleType" v-model:licensePlate="licensePlate" v-model:vehicleBrand="vehicleBrand" v-model:vehicleModel="vehicleModel" v-model:driverLicense="driverLicense" />
+        </div>
         <button type="submit" :disabled="loading">Actualizar Perfil</button>
       </form>
       <p v-if="profileMessage" :class="{ error: profileError }">{{ profileMessage }}</p>
@@ -59,6 +57,7 @@ import { useUserStore } from '../store/userStore.js';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useFavoriteStore } from '../store/favoriteStore';
+import DriverForm from '../components/DriverForm.vue';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -69,9 +68,14 @@ const name = ref(user.value?.name || '');
 const email = ref(user.value?.email || '');
 const address = ref(user.value?.address?.street || '');
 const password = ref('');
-
-
 const favoriteVendors = ref([]);
+
+let phone = ref('');
+let vehicleType = ref('');
+let licensePlate = ref('');
+let vehicleBrand = ref('');
+let vehicleModel = ref('');
+let driverLicense = ref('');
 
 const profileMessage = ref('');
 const profileError = ref(false);
@@ -103,8 +107,18 @@ const updateProfile = async () => {
   profileMessage.value = '';
   profileError.value = false;
 
+  const DriverData = {
+    phone: phone.value,
+    vehicleType: vehicleType.value,
+    licensePlate: licensePlate.value,
+    vehicleBrand: vehicleBrand.value,
+    vehicleModel: vehicleModel.value,
+    driverLicense: driverLicense.value
+  };
+
   try {
-    const body = { name: name.value, email: email.value, address: address.value };
+    let body = { name: name.value, email: email.value, address: address.value };
+    if(DriverData && user.value.role === 'DRIVER') body.driverProfile = DriverData;
     console.log(body)
     const res = await axios.put(`http://localhost:3000/user/${user.value.id}`, body, authHeaders());
     userStore.user = res.data;
@@ -136,6 +150,13 @@ const getAvailable = async () => {
   try {
     const res = await axios.get(`http://localhost:3000/drivers/${user.value.driverProfileId}`, authHeaders());
     available.value = res.data.isActive;
+
+    phone.value = res.data.phone || '';
+    vehicleType.value = res.data.vehicleType || '';
+    licensePlate.value = res.data.licensePlate || '';
+    vehicleBrand.value = res.data.vehicleBrand || '';
+    vehicleModel.value = res.data.vehicleModel || '';
+    driverLicense.value = res.data.driverLicense || '';
   } catch (err) {
     console.error('Error al obtener disponibilidad:', err);
   }

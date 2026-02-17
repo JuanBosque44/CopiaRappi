@@ -19,7 +19,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '../../store';
+import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import VendorLayoutView from '../../layouts/VendorLayoutView.vue';
 

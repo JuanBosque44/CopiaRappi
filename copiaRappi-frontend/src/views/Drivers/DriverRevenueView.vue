@@ -19,7 +19,7 @@
 <script setup>
 import DriverLayoutView from '../../layouts/DriverLayoutView.vue';
 import { ref, onMounted, computed } from 'vue';
-import { useUserStore } from '../../store';
+import { useUserStore } from '../../store/userStore.js';
 import OrderCard from '../../components/OrderCard.vue';
 import { useOrders } from '../../composables/useOrders.js';
 

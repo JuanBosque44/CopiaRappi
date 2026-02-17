@@ -121,14 +121,11 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
           await this.userRepository.save(savedUser);
       }
       else if (savedUser.role === UserRole.DRIVER && driverProfile) {
-      //Puede recibir el dto como objeto o un objeto que tenga las mismas caracteristicas
-      console.log('Driver: '+driverProfile)
-      if ((driverProfile as any).createDriverDto) {
-          dto = (driverProfile as any).createDriverDto as CreateDriverDto;
-      } else {
-          dto = Object.assign(new CreateDriverDto(), driverProfile as unknown as Partial<CreateDriverDto>);
-      }
-      (dto as any).userId = savedUser.id;
+      console.log('Driver: '+driverProfile.DriverDto)
+      dto = new CreateDriverDto();
+      dto = driverProfile.DriverDto;
+      dto.userId = savedUser.id;
+
       console.log('Creando perfil de conductor con los siguientes datos:', dto);
       const savedEntity = await this.driversService.create(dto);
       savedUser.driverProfile = savedEntity;

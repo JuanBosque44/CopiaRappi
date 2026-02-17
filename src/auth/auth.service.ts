@@ -56,9 +56,9 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
-        vendorProfileId: user.vendorProfile?.id ?? null,
-        driverProfileId: user.driverProfile?.id ?? null,
-        backOfficeProfileId: user.backOfficeProfile?.id ?? null,
+        vendorProfileId: user.vendorProfile?.id ?? user.vendorProfileId ?? null,
+        driverProfileId: user.driverProfile?.id ?? user.driverProfileId ?? null,
+        backOfficeProfileId: user.backOfficeProfile?.id ?? user.backOfficeProfileId ?? null,
       },
     };
   }

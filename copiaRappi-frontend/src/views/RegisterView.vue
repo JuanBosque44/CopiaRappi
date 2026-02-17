@@ -13,22 +13,14 @@
         <option value="VENDOR">Vendedor</option>
       </select>
 
-      <div v-if="role === 'DRIVER'" class="role-form">
-        <h3>Datos del conductor y vehículo</h3>
-        
-        <input v-model="phone" type="tel" placeholder="Teléfono (Ej: +569...)" required />
-
-        <select v-model="vehicleType" required>
-          <option disabled value="">Tipo de Vehículo</option>
-          <option value="MOTORCYCLE">Moto</option>
-          <option value="BICYCLE">Bicicleta</option>
-          <option value="CAR">Auto</option>
-        </select>
-        <input v-model="licensePlate" type="text" placeholder="Patente / Matrícula" required />
-        <input v-model="vehicleBrand" type="text" placeholder="Marca del Vehículo (Ej: Yamaha)" />
-        <input v-model="vehicleModel" type="text" placeholder="Modelo del Vehículo (Ej: FZ 25)" />
-        
-        <input v-model="driverLicense" type="text" placeholder="Número de Licencia de Conducir" required />
+      <div v-if="role === 'DRIVER'">
+        <DriverForm v-model:phone="phone" 
+                    v-model:vehicleType="vehicleType" 
+                    v-model:licensePlate="licensePlate" 
+                    v-model:vehicleBrand="vehicleBrand" 
+                    v-model:vehicleModel="vehicleModel" 
+                    v-model:driverLicense="driverLicense" 
+                    v-on:validate-driver-form="handleDriverFormValidation"  />
       </div>
 
       <div v-else-if="role === 'VENDOR'" class="role-form">
@@ -47,6 +39,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import DriverForm from '../components/DriverForm.vue';
 
 const name = ref('');
 const email = ref('');
@@ -74,8 +67,26 @@ const isPhoneNumberValid = (number) => {
   return phoneRegex.test(number);
 };
 
+const handleDriverFormValidation = (isValid) => {
+  if (!isValid) {
+    errorMessage.value = 'Debes completar todos los datos del conductor y vehículo correctamente.';
+    console.warn('Validación del formulario de conductor fallida:', { phone: phone.value, vehicleType: vehicleType.value, licensePlate: licensePlate.value, vehicleBrand: vehicleBrand.value, vehicleModel: vehicleModel.value, driverLicense: driverLicense.value });
+  } else {
+    errorMessage.value = '';
+    phone.value = isValid.phone;
+    vehicleType.value = isValid.vehicleType;
+    licensePlate.value = isValid.licensePlate;
+    vehicleBrand.value = isValid.vehicleBrand;
+    vehicleModel.value = isValid.vehicleModel;
+    driverLicense.value = isValid.driverLicense;
+    console.log('Validación del formulario de conductor exitosa:', { phone: phone.value, vehicleType: vehicleType.value, licensePlate: licensePlate.value, vehicleBrand: vehicleBrand.value, vehicleModel: vehicleModel.value, driverLicense: driverLicense.value });
+  }
+};
+
 const validateFields = () => {
   errorMessage.value = ''; 
+  
+
   
   if (!name.value || !email.value || !password.value || !role.value) {
     errorMessage.value = 'Debes completar el nombre, email, contraseña y seleccionar un rol.';
@@ -88,8 +99,9 @@ const validateFields = () => {
       return false;
     }
 
-    if (!phone.value || !vehicleType.value || !licensePlate.value || !vehicleModel.value || !driverLicense.value) {
+    if (handleDriverFormValidation === false) {
       errorMessage.value = 'Debes completar todos los datos personales, del vehículo y la licencia.';
+      console.log(phone.value + ' ' + vehicleType.value + ' ' + licensePlate.value + ' ' + vehicleModel.value + ' ' + driverLicense.value);
       return false;
     }
   } else if (role.value === 'VENDOR') {
