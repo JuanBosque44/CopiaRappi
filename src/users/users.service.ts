@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user/user.entity';
@@ -20,6 +20,7 @@ import { paginate } from 'src/shared/utils/pagination';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './entities/dto/user-response.dto';
 import { UserFavoriteVendorResponseDto } from './entities/dto/user-favoriteVendor-response.dto';
+import { validateEmail } from 'src/shared/utils/email-validation';
 
 @Injectable()
 export class UsersService implements IServiceInterface<User, CreateUserDto, UpdateUserDto, UserResponseDto> {
@@ -83,14 +84,16 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
   }
         
   async create(data: CreateUserDto): Promise<UserResponseDto> {
-      try {
-          let address: Address | undefined;
-          let emailLower = data.email.toLowerCase();
-          let savedEntity;
-          let dto;
+    try {
+        let address: Address | undefined;
+        let emailLower = data.email.toLowerCase();
+        let savedEntity;
+        let dto;
 
-          const validEmail = await this.findByEmail(emailLower)
-          if(validEmail) throw new UnauthorizedException('No se puede crear un usuario con el email ingresado')
+        const validEmail = await this.findByEmail(emailLower)
+        if(validateEmail(emailLower) === false) throw new BadRequestException('El email ingresado no es válido')
+        if(validEmail) throw new UnauthorizedException('No se puede crear un usuario con el email ingresado')
+        
 
     if (data.address) {
       this.addressInsert(data.address.street)
@@ -110,37 +113,34 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
       
       //verificar si se puede refactorizar el siguiente codigo, ya que es repetitivo.
       if (savedUser.role === UserRole.VENDOR && vendorProfile) {
-          dto = new CreateVendorDto();
-          dto = vendorProfile.VendorDto;
-          dto.UserId = savedUser.id;
-          console.log('Creando perfil de vendedor con los siguientes datos:', dto);
-          savedEntity = await this.vendorsService.create(dto);
-
-          savedUser.vendorProfile = savedEntity;
-          savedUser.vendorProfileId = savedEntity.id;
-          await this.userRepository.save(savedUser);
-      }
-      else if (savedUser.role === UserRole.DRIVER && driverProfile) {
-      console.log('Driver: '+driverProfile.DriverDto)
-      dto = new CreateDriverDto();
-      dto = driverProfile.DriverDto;
-      dto.userId = savedUser.id;
-
-      console.log('Creando perfil de conductor con los siguientes datos:', dto);
-      const savedEntity = await this.driversService.create(dto);
-      savedUser.driverProfile = savedEntity;
-      savedUser.driverProfileId = savedEntity.id;
-      await this.userRepository.save(savedUser);
-    } else if (savedUser.role === UserRole.ADMIN) {
-      if (backOfficeProfile) {
-        const dto = Object.assign(new CreateBackofficeDto(), backOfficeProfile as unknown as Partial<CreateBackofficeDto>);
+        dto = new CreateVendorDto();
+        dto = vendorProfile.VendorDto;
         dto.UserId = savedUser.id;
-        const savedEntity = await this.backofficeService.create(dto);
+        console.log('Creando perfil de vendedor con los siguientes datos:', dto);
+        savedEntity = await this.vendorsService.create(dto);
 
-        savedUser.backOfficeProfile = savedEntity;
-        savedUser.backOfficeProfileId = savedEntity.id;
+        savedUser.vendorProfile = savedEntity;
+        savedUser.vendorProfileId = savedEntity.id;
         await this.userRepository.save(savedUser);
       }
+      else if (savedUser.role === UserRole.DRIVER && driverProfile) {
+        dto = new CreateDriverDto();
+        dto = driverProfile.DriverDto;
+        dto.userId = savedUser.id;
+
+        console.log('Creando perfil de conductor con los siguientes datos:', dto);
+        const savedEntity = await this.driversService.create(dto);
+        savedUser.driverProfile = savedEntity;
+        savedUser.driverProfileId = savedEntity.id;
+        await this.userRepository.save(savedUser);
+    } else if (savedUser.role === UserRole.ADMIN && backOfficeProfile) {
+      const dto = Object.assign(new CreateBackofficeDto(), backOfficeProfile as unknown as Partial<CreateBackofficeDto>);
+      dto.UserId = savedUser.id;
+      const savedEntity = await this.backofficeService.create(dto);
+
+      savedUser.backOfficeProfile = savedEntity;
+      savedUser.backOfficeProfileId = savedEntity.id;
+      await this.userRepository.save(savedUser);
     }
 
     return plainToInstance(UserResponseDto, savedUser, { excludeExtraneousValues: true });
@@ -169,9 +169,11 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
 
     // Si se ha enviado una nueva contraseña, la hasheamos antes de guardarla
     if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);  // Hashing de la nueva contraseña
-      user.password = hashedPassword;  // Actualizamos la contraseña del usuario
+      const hashedPassword = await bcrypt.hash(password, 10);  
+      user.password = hashedPassword;  
     }
+
+    validateEmail(user.email) === false && (() => { throw new BadRequestException('El email ingresado no es válido') })();
 
     Object.assign(user, rest);
     if (rest.address) {

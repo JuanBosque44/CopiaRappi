@@ -47,6 +47,10 @@ export class AuthService {
       vendorProfileId: user.vendorProfileId ?? null,
       driverProfileId: user.driverProfileId ?? null,
       backOfficeProfileId: user.backOfficeProfileId ?? null,
+      address: user.address ? {
+        id: user.address.id,
+        street: user.address.street,
+      } : null,
     };
     
     return {
@@ -59,6 +63,10 @@ export class AuthService {
         vendorProfileId: user.vendorProfile?.id ?? user.vendorProfileId ?? null,
         driverProfileId: user.driverProfile?.id ?? user.driverProfileId ?? null,
         backOfficeProfileId: user.backOfficeProfile?.id ?? user.backOfficeProfileId ?? null,
+        address: user.address ? {
+          id: user.address.id,
+          street: user.address.street,
+        } : null,
       },
     };
   }
