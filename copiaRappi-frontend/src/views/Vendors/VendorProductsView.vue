@@ -48,9 +48,11 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
+import { usePCategoryStore } from '../../store/productCategoryStore.js';
 import VendorLayoutView from '../../layouts/VendorLayoutView.vue';
 
 const userStore = useUserStore();
+const pCategoryStore = usePCategoryStore();
 
 /* =====================
    Estado
@@ -95,11 +97,7 @@ const getCategoryName = (categoryId) => {
 
 const fetchCategories = async () => {
   try {
-    const { data } = await axios.get(
-      'http://localhost:3000/products/category',
-      authHeaders()
-    );
-    categories.value = data.data || data;
+    categories.value = await pCategoryStore.fetchCategories() || [];
   } catch (err) {
     console.error('Error cargando categorías:', err);
   }
@@ -230,8 +228,13 @@ const changeColor = (isActive) => {
 ===================== */
 
 onMounted(async () => {
-  await fetchCategories();
-  await fetchProducts();
+  try{
+    await fetchCategories();
+    await fetchProducts();
+  }
+  catch(err){
+    console.error('Error al cargar datos del vendedor:', err);
+  }
 });
 </script>
 

@@ -4,6 +4,7 @@
     <nav style="margin-bottom: 2%;" v-if="user.role !== 'ADMIN'">
      <router-link to="/user/orders" v-if="user.role === 'CLIENT'">Mis Órdenes </router-link> 
      <router-link to="/driver" v-if="user.role === 'DRIVER'">Entregas </router-link> 
+     <router-link to="/vendor" v-if="user.role === 'VENDOR'">Mi Negocio </router-link>
      | <router-link to="/user/support">Soporte</router-link>
     </nav>
 

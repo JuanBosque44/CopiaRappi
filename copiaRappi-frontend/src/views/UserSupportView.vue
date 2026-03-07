@@ -1,7 +1,15 @@
 <script setup>
     import { onMounted, ref } from 'vue';
     import axios from 'axios';
+    import { useSupportStore } from '../store/supportStore.js';
+    import { useUserStore } from '../store/userStore.js';
+    import VendorLayoutView from '../layouts/VendorLayoutView.vue';
+    import DriverLayoutView from '../layouts/DriverLayoutView.vue';
 
+    const supportStore = useSupportStore();
+    const userStore = useUserStore();
+
+    const user = ref(userStore.user);
     const message = ref('');
     const error = ref('');
     const selectedReason = ref('');
@@ -42,8 +50,8 @@
 
     onMounted(async () => {
         try {
-            const res = await axios.get('http://localhost:3000/support/categories');
-            await transformReasons(res.data);
+            const res = await supportStore.fetchReasons() || [];
+            await transformReasons(res);
         } catch (err) {
             console.error('Error al cargar las razones de soporte:', err);
             error.value = 'No se pudieron cargar las razones de soporte';
@@ -63,6 +71,10 @@
     <div class="support-container container">
         <h1>Soporte</h1>
         <div class="container">
+            <div class="navs">
+                <VendorLayoutView v-if="user.role === 'VENDOR'" />
+                <DriverLayoutView v-if="user.role === 'DRIVER'" />
+            </div>
             <h3>¿Necesitas ayuda? ¿Detectaste algun error? Contáctanos:</h3>
             <form @submit.prevent="submitForm">
                 <div class="form-section">
@@ -135,6 +147,12 @@ select {
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 315px;
+}
+
+.navs {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
 </style>
