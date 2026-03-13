@@ -9,12 +9,12 @@ import { VendorsModule } from 'src/vendors/vendors.module';
 import { BackofficeModule } from 'src/backoffice/backoffice.module';
 import { DriversModule } from 'src/drivers/drivers.module';
 import { ReviewModule } from 'src/review/review.module';
-import { AuthModule } from 'src/auth/auth.module';
 import { SupportModule } from 'src/support/support.module';
+import { UserProfileFactory } from './user.factory';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Address]), OrdersModule, VendorsModule, BackofficeModule, DriversModule, forwardRef(() => ReviewModule), forwardRef(()=> AuthModule), forwardRef(() => SupportModule)],
-  providers: [UsersService],
+  imports: [TypeOrmModule.forFeature([User, Address]), OrdersModule, VendorsModule, BackofficeModule, DriversModule, forwardRef(() => ReviewModule), forwardRef(() => SupportModule)],
+  providers: [UsersService, UserProfileFactory],
   controllers: [UserController],
   exports: [TypeOrmModule, UsersService],
 })

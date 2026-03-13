@@ -8,11 +8,6 @@ import { Address } from './entities/user/address.entity';
 import { UpdateUserDto } from './entities/dto/update-user.dto';
 import { UserRole } from './entities/user/user.entity';
 import { VendorsService } from 'src/vendors/vendors.service';
-import { CreateVendorDto } from 'src/vendors/entities/dto/create-vendor.dto';
-import { CreateDriverDto } from 'src/drivers/entities/dto/create-driver.dto';
-import { DriversService } from 'src/drivers/drivers.service';
-import { BackofficeService } from 'src/backoffice/backoffice.service';
-import { CreateBackofficeDto } from 'src/backoffice/entities/dto/create-backoffice.dto';
 import { ClientDataDto } from './entities/dto/client-data.dto';
 import * as bcrypt from 'bcryptjs';
 import { PaginatedResult } from 'src/shared/interfaces/paginatedResult.type';
@@ -21,6 +16,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './entities/dto/user-response.dto';
 import { UserFavoriteVendorResponseDto } from './entities/dto/user-favoriteVendor-response.dto';
 import { validateEmail } from 'src/shared/utils/email-validation';
+import { UserProfileFactory } from './user.factory';
 
 @Injectable()
 export class UsersService implements IServiceInterface<User, CreateUserDto, UpdateUserDto, UserResponseDto> {
@@ -30,8 +26,7 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
     @InjectRepository(Address)
     private readonly addressRepository: Repository<Address>,
     private readonly vendorsService: VendorsService,
-    private readonly driversService: DriversService,
-    private readonly backofficeService: BackofficeService,
+    private readonly userProfileFactory: UserProfileFactory,
   ) {}
 
   async findAll(options: { page?: number; limit?: number; [key: string]: any } = {}): Promise<User[] | PaginatedResult<User>> {
@@ -76,8 +71,9 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
   }
 
   async findByEmail(email: string) {
+      validateEmail(email.toLowerCase()) === false && (() => { throw new BadRequestException('El email ingresado no es válido') })();
       const user = await this.userRepository.findOne({
-        where: { email: email },
+        where: { email: email.toLowerCase() },
       });
       return user
 
@@ -88,7 +84,6 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
         let address: Address | undefined;
         let emailLower = data.email.toLowerCase();
         let savedEntity;
-        let dto;
 
         const validEmail = await this.findByEmail(emailLower)
         if(validateEmail(emailLower) === false) throw new BadRequestException('El email ingresado no es válido')
@@ -111,39 +106,22 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
 
       const savedUser = await this.userRepository.save(user);
       
-      //verificar si se puede refactorizar el siguiente codigo, ya que es repetitivo.
       if (savedUser.role === UserRole.VENDOR && vendorProfile) {
-        dto = new CreateVendorDto();
-        dto = vendorProfile.VendorDto;
-        dto.UserId = savedUser.id;
-        console.log('Creando perfil de vendedor con los siguientes datos:', dto);
-        savedEntity = await this.vendorsService.create(dto);
-
-        savedUser.vendorProfile = savedEntity;
-        savedUser.vendorProfileId = savedEntity.id;
-        await this.userRepository.save(savedUser);
+          savedEntity = await this.userProfileFactory.createProfile(savedUser.role, savedUser.id, vendorProfile);
+          savedUser.vendorProfile = savedEntity;
+          savedUser.vendorProfileId = savedEntity.id;
+      } else if (savedUser.role === UserRole.DRIVER && driverProfile) {
+          savedEntity = await this.userProfileFactory.createProfile(savedUser.role, savedUser.id, driverProfile);
+          savedUser.driverProfile = savedEntity;
+          savedUser.driverProfileId = savedEntity.id;
+      } else if (savedUser.role === UserRole.ADMIN && backOfficeProfile) {
+          savedEntity = await this.userProfileFactory.createProfile(savedUser.role, savedUser.id, backOfficeProfile);
+          savedUser.backOfficeProfile = savedEntity;
+          savedUser.backOfficeProfileId = savedEntity.id;
       }
-      else if (savedUser.role === UserRole.DRIVER && driverProfile) {
-        dto = new CreateDriverDto();
-        dto = driverProfile.DriverDto;
-        dto.userId = savedUser.id;
-
-        console.log('Creando perfil de conductor con los siguientes datos:', dto);
-        const savedEntity = await this.driversService.create(dto);
-        savedUser.driverProfile = savedEntity;
-        savedUser.driverProfileId = savedEntity.id;
-        await this.userRepository.save(savedUser);
-    } else if (savedUser.role === UserRole.ADMIN && backOfficeProfile) {
-      const dto = Object.assign(new CreateBackofficeDto(), backOfficeProfile as unknown as Partial<CreateBackofficeDto>);
-      dto.UserId = savedUser.id;
-      const savedEntity = await this.backofficeService.create(dto);
-
-      savedUser.backOfficeProfile = savedEntity;
-      savedUser.backOfficeProfileId = savedEntity.id;
       await this.userRepository.save(savedUser);
-    }
 
-    return plainToInstance(UserResponseDto, savedUser, { excludeExtraneousValues: true });
+      return plainToInstance(UserResponseDto, savedUser, { excludeExtraneousValues: true });
 
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -156,7 +134,6 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
   }
 }
 
-  // Método para actualizar usuario
   async update(id: number, body: UpdateUserDto): Promise<User> {
     const { driverProfile, vendorProfile, backOffice, password, ...rest } = body as any;
 
@@ -173,7 +150,7 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
       user.password = hashedPassword;  
     }
 
-    validateEmail(user.email) === false && (() => { throw new BadRequestException('El email ingresado no es válido') })();
+    validateEmail(user.email.toLowerCase()) === false && (() => { throw new BadRequestException('El email ingresado no es válido') })();
 
     Object.assign(user, rest);
     if (rest.address) {
@@ -182,52 +159,14 @@ export class UsersService implements IServiceInterface<User, CreateUserDto, Upda
       user.addressId = newAddress.id;
     }
 
-    // Si hay un perfil de vendedor, lo actualizamos
     if (vendorProfile) {
-      let dtoV: CreateVendorDto;
-      if ((vendorProfile as any).createVendorDto) {
-        dtoV = (vendorProfile as any).createVendorDto as CreateVendorDto;
-      } else {
-        dtoV = Object.assign(new CreateVendorDto(), vendorProfile as unknown as Partial<CreateVendorDto>);
-      }
-      dtoV.UserId = user.id;
-
-      if (user.vendorProfileId) {
-        await this.vendorsService.update(user.vendorProfileId, dtoV);
-        user.vendorProfile = await this.vendorsService.findOne(user.vendorProfileId);
-      } else {
-        const createdV = await this.vendorsService.create(dtoV);
-        user.vendorProfile = createdV;
-        user.vendorProfileId = createdV.id;
-      }
+      user.vendorProfile = await this.userProfileFactory.updateProfile(user.role, user.id, vendorProfile, user.vendorProfileId);
     }
-
-    // Si hay un perfil de conductor, lo actualizamos
     if (driverProfile) {
-      let dtoD: CreateDriverDto = Object.assign(new CreateDriverDto(), driverProfile as unknown as Partial<CreateDriverDto>);
-      (dtoD as any).userId = user.id;
-      if (user.driverProfileId) {
-        await this.driversService.update(user.driverProfileId, dtoD);
-        user.driverProfile = await this.driversService.findOne(user.driverProfileId);
-      } else {
-        const createdD = await this.driversService.create(dtoD);
-        user.driverProfile = createdD;
-        user.driverProfileId = createdD.id;
-      }
+      user.driverProfile = await this.userProfileFactory.updateProfile(user.role, user.id, driverProfile, user.driverProfileId);
     }
-
-    // Si hay un perfil de backoffice, lo actualizamos
     if (backOffice) {
-      let dtoB: CreateBackofficeDto = Object.assign(new CreateBackofficeDto(), backOffice as unknown as Partial<CreateBackofficeDto>);
-      dtoB.UserId = user.id;
-      if (user.backOfficeProfileId) {
-        await this.backofficeService.update(user.backOfficeProfileId, dtoB);
-        user.backOfficeProfile = await this.backofficeService.findOne(user.backOfficeProfileId);
-      } else {
-        const createdB = await this.backofficeService.create(dtoB);
-        user.backOfficeProfile = createdB;
-        user.backOfficeProfileId = createdB.id;
-      }
+      user.backOfficeProfile = await this.userProfileFactory.updateProfile(user.role, user.id, backOffice, user.backOfficeProfileId);
     }
 
     await this.userRepository.save(user);
