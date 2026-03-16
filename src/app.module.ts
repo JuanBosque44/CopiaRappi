@@ -44,7 +44,7 @@ import { PaymentsMethodsModule } from './payments/payments-methods/payments-meth
     BackofficeModule, 
     ReviewModule, 
     PaymentsModule, 
-    forwardRef(()=> PaymentsMethodsModule) ,  
+    PaymentsMethodsModule,  
   ],
   controllers: [
     AppController, 

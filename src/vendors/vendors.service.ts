@@ -11,6 +11,8 @@ import { paginate } from 'src/shared/utils/pagination';
 import { VendorResponseDto } from './entities/dto/vendor-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { VendorStatisticsDto } from './entities/dto/vendor-statistics.dto';
+import { UserSummaryDto } from 'src/users/entities/dto/user-summary.dto';
+import { User } from 'src/users/entities/user/user.entity';
 
 @Injectable()
 export class VendorsService implements IServiceInterface <Vendor, CreateVendorDto, UpdateVendorDto, VendorResponseDto> {
@@ -50,12 +52,16 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
   /**  Obtener un vendor por id con sus productos y reviews.
    * @param id vendorProfileId del user (id del tipo de usuario vendor).*/ 
   async findOne(id: number): Promise<Vendor> {
-    const vendor = await this.vendorsRepository.findOne({
+    let vendor = await this.vendorsRepository.findOne({
       where: { id },
       relations: ['products', 'reviews'],
     });
     if (!vendor) {
       throw new NotFoundException(`Vendedor con id ${id} no encontrado`);
+    }
+    for (const review of vendor.reviews) {
+      const summary = plainToInstance(UserSummaryDto, review.user, { excludeExtraneousValues: true });
+      review.user = {...summary, id: review.user.id} as User;
     }
     return vendor;
   }
@@ -83,6 +89,9 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
 
   async update(id: number, dto: UpdateVendorDto): Promise<Vendor> {
     const vendor = await this.findOne(id);
+    if (!vendor) {
+      throw new NotFoundException(`Vendedor con id ${id} no encontrado`);
+    }
     Object.assign(vendor, dto);
     return this.vendorsRepository.save(vendor);
   }

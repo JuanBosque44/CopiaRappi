@@ -6,7 +6,7 @@
 
     <!-- PERFIL DEL NEGOCIO -->
     <section>
-      <h3>🏢 Perfil del negocio</h3>
+      <h3> Perfil del negocio</h3>
       <form @submit.prevent="updateVendorProfile">
         <input v-model="vendor.shopName" placeholder="Nombre del negocio" required />
         <textarea v-model="vendor.description" placeholder="Descripción"></textarea>
@@ -45,8 +45,15 @@ const updateVendorProfile = async () => {
 
 const getVendorProfile = async () => {
   try {
+    if (!vendor.id) return;
+    if (localStorage.getItem('vendorProfile')) {
+      const cachedProfile = JSON.parse(localStorage.getItem('vendorProfile'));
+      Object.assign(vendor, cachedProfile);
+      return;
+    }
     const { data } = await axios.get(`http://localhost:3000/vendors/${vendor.id}`, authHeaders());
     Object.assign(vendor, data);
+    localStorage.setItem('vendorProfile', JSON.stringify(data));
   } catch (err) {
     console.error(err);
   }

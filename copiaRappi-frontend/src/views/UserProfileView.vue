@@ -1,12 +1,9 @@
 <template>
   <div class="profile-container">
     <h1>Mi Perfil</h1>
-    <nav style="margin-bottom: 2%;" v-if="user.role !== 'ADMIN'">
-     <router-link to="/user/orders" v-if="user.role === 'CLIENT'">Mis Órdenes </router-link> 
-     <router-link to="/driver" v-if="user.role === 'DRIVER'">Entregas </router-link> 
-     <router-link to="/vendor" v-if="user.role === 'VENDOR'">Mi Negocio </router-link>
-     | <router-link to="/user/support">Soporte</router-link>
-    </nav>
+    <AdminLayoutView style="margin-bottom: 2%;" v-if="user.role === 'ADMIN'"/>
+    <DriverLayoutView style="margin-bottom: 2%;" v-else-if="user.role === 'DRIVER'" />
+    <ClientLayoutView style="margin-bottom: 2%;" v-else-if="user.role === 'CLIENT'" />
 
     <div v-if="user">
       <form @submit.prevent="updateProfile">
@@ -59,6 +56,9 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useFavoriteStore } from '../store/favoriteStore';
 import DriverForm from '../components/DriverForm.vue';
+import AdminLayoutView from '../layouts/AdminLayoutView.vue';
+import DriverLayoutView from '../layouts/DriverLayoutView.vue';
+import ClientLayoutView from '../layouts/ClientLayoutView.vue';
 
 const userStore = useUserStore();
 const router = useRouter();

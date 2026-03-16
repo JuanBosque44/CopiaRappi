@@ -5,6 +5,7 @@
     import { useUserStore } from '../store/userStore.js';
     import VendorLayoutView from '../layouts/VendorLayoutView.vue';
     import DriverLayoutView from '../layouts/DriverLayoutView.vue';
+    import { TransformReasons } from '../composables/useReason.js';
 
     const supportStore = useSupportStore();
     const userStore = useUserStore();
@@ -32,20 +33,9 @@
     };
 
     const transformReasons = async (reasonsArray) => {
-        try {
-            const enumerableReasons = {
-                'ORDER': 'Problemas con mi pedido',
-                'PAYMENT': 'Problemas con el pago',
-                'OTHER': 'Otros problemas',
-                'ACCOUNT': 'Problemas con mi cuenta',
-            };
-            reasonsMeaning.value = reasonsArray.map(reason => enumerableReasons[reason] || reason);
-            reasons.value = reasonsArray;
-        }
-        catch (err) {
-            console.error('Error al transformar las razones de soporte:', err);
-            error.value = 'No se pudieron cargar las razones de soporte';
-        }
+        reasons.value = reasonsArray.map(r => r.id);
+        reasonsMeaning.value = TransformReasons(reasonsArray, error);
+        console.log('Razones transformadas:', reasonsMeaning.value);
     }
 
     onMounted(async () => {

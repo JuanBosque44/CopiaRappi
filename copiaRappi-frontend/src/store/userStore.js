@@ -8,7 +8,7 @@ export const useUserStore = defineStore('user', {
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
-    isAdmin: (state) => state.user?.role === 'admin',
+    isAdmin: (state) => state.user?.role === 'ADMIN',
   },
   actions: {
     async login({ email, password }) {
@@ -40,8 +40,10 @@ export const useUserStore = defineStore('user', {
       this.token = null;
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      localStorage.removeItem('favorites');  
+      localStorage.setItem('favorites', JSON.stringify([])); 
       localStorage.removeItem('cart');       
+      localStorage.removeItem('vendorProfile');
+      localStorage.removeItem('selectedVendor');
     },
   },
 });

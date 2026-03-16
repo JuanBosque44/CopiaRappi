@@ -1,13 +1,19 @@
 <template>
   <div class="admin-container">
     <h1>Panel de Administración</h1>
+
+    <AdminLayoutView />
     <div class="admin-grid">
       <section>
         <div v-if="users.length">
           <h3>Lista de usuarios:</h3>
           <ul>
             <li v-for="u in users" :key="u.id">
-              {{ u.name }} — {{ u.email }} — Rol: {{ u.role }}
+              {{ u.name }} — {{ u.email }} — Rol:
+              <span v-if="u.role === 'VENDOR'">Vendedor</span>
+              <span v-else-if="u.role === 'ADMIN'">Administrador</span>
+              <span v-else-if="u.role === 'DRIVER'">Conductor</span>
+              <span v-else>Cliente</span>
               <button class="button" @click="deleteUser(u.id)">Eliminar</button>
             </li>
           </ul>
@@ -21,13 +27,14 @@
         <h4>Mensajes recibidos:</h4>
         <div v-if="messages.length !== 0">
           <ul>
-            <li v-for="msg in messages" :key="msg.id">
-              {{ msg.supportCategory }}
-              <br>
-              {{ msg.status }}
-              <br>
-              {{ msg.description }} — De: {{ emails }}
-              <button :disabled="msg.status === 'RESOLVED'" @click="respondMessage(msg)">Responder</button>
+            <li v-for="msg in messages" :key="msg.id" class="message-row">
+              <div class="message-row-content">
+                <div class="message-field"><strong>Categoría:</strong> {{ transformCategory(msg.supportCategory) || msg.supportCategory }}</div>
+                <div class="message-field"><strong>Estado:</strong> {{ msg.status }}</div>
+                <div class="message-field"><strong>Descripción:</strong> {{ msg.description }}</div>
+                <div class="message-field"><strong>Usuario:</strong> {{ emails[messages.indexOf(msg)] || 'Desconocido' }}</div>
+              </div>
+              <button class="button" :disabled="msg.status === 'RESOLVED'" @click="respondMessage(msg)">Responder</button>
             </li>
           </ul>
         </div>
@@ -43,9 +50,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
+import AdminLayoutView from '/src/layouts/AdminLayoutView.vue';
+import { TransformReasons } from '../../composables/useReason.js';
 
 const userStore = useUserStore();
 const users = ref([]);
@@ -61,6 +70,7 @@ const fetchUsers = async () => {
       'http://localhost:3000/user', authHeaders()
     );
     users.value = data || [];
+    users.value.sort((a, b) => a.name.localeCompare(b.name));
   } catch (err) {
     console.warn('⚠️ Error al buscar usuarios:' + err);
   }
@@ -81,7 +91,6 @@ const deleteUser = async (id) => {
 const messages = ref([]);
 const mensajeError = ref('');
 const emails = ref([]);
-
 const receiveMessages = async (incremento) => {
   try {
     page.value += incremento;
@@ -100,7 +109,7 @@ const receiveMessages = async (incremento) => {
 
     for (var i = 0; i < messages.value.length; i++) {
       const user = await axios.get('http://localhost:3000/user/'+messages.value[i].userId, authHeaders());
-      emails.value = user.data.email;
+      emails.value[i] = user.data.email;
     }
   } catch (err) {
     console.error('Error al recibir los mensajes: ', err);
@@ -130,6 +139,13 @@ const respondMessage = async (msg) => {
     console.log('Error al responder el mensaje: ' + ex)
   }
 }
+
+const transformCategory = computed(() => {
+  return (supportCategory) => {
+    const reasons = TransformReasons([supportCategory], mensajeError);
+    return reasons[0];
+  };
+});
 
 onMounted(() => {
   fetchUsers();
@@ -167,10 +183,10 @@ li {
   background: #e74c3c;
   color: white;
   border: none;
-  padding: 0.3rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
   margin-left: 1%;
+  padding: auto;
 }
 
 .btn-paginas {
@@ -189,6 +205,35 @@ li {
   align-items: start;
 }
 
+.message-row {
+  background: #fff;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.message-row-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  align-items: start;
+  margin-bottom: 0.4rem;
+}
+
+.message-field {
+  padding: 6px 8px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #e1e1e1;
+  word-break: break-word;
+}
+
+.message-field strong {
+  display: inline-block;
+  width: 95px;
+  font-weight: 700;
+}
 
 .button:hover {
   background: #c0392b;
@@ -198,6 +243,10 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background-color: #aaa; 
+}
+
+span{
+  color: green;
 }
 
 </style>

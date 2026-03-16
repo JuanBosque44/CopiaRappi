@@ -20,11 +20,11 @@ export class PaymentsMethodsService implements IServiceInterface<PaymentsMethod,
   }
 
   findAll() {
-    return this.paymethodRepository.find();
+    return this.paymethodRepository.find({where:{isActive: true}});
   }
 
   findOne(id: number) {
-    return this.paymethodRepository.findOne({where:{id: id}});
+    return this.paymethodRepository.findOne({where:{id: id, isActive: true}}); 
   }
 
   update(id: number, updatePaymentsMethodDto: UpdatePaymentsMethodDto) : Promise<any> {
