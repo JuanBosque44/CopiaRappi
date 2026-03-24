@@ -1,6 +1,16 @@
+import { IsString, Length, IsNumber, IsNotEmpty, IsOptional } from 'class-validator';
+
 export class CreateVendorDto {
-    readonly name: string;
-    readonly address: string;
-    readonly phone: string;
-    readonly isActive?: boolean;
+  @IsString()
+  @Length(2, 50)
+  @IsNotEmpty({ message: 'El nombre de la tienda no debe estar vacío' })
+  shopName: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsNumber()
+  UserId: number;
+
 }

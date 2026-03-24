@@ -1,0 +1,49 @@
+import { defineStore } from 'pinia';
+import axios from 'axios';
+
+export const useUserStore = defineStore('user', {
+  state: () => ({
+    user: JSON.parse(localStorage.getItem('user')) || null,   // email, name, role, etc.
+    token: null,
+  }),
+  getters: {
+    isAuthenticated: (state) => !!state.token,
+    isAdmin: (state) => state.user?.role === 'ADMIN',
+  },
+  actions: {
+    async login({ email, password }) {
+      const { data } = await axios.post('http://localhost:3000/auth/login', { email, password });
+      this.user = data.user;       // <-- data.user debe traer role
+      this.token = data.access_token;
+      localStorage.setItem('user', JSON.stringify(this.user));
+      localStorage.setItem('token', this.token);
+    },
+    loadUserFromStorage() {
+      const user = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+      if (user && token) {
+        this.user = JSON.parse(user);
+        this.token = token;
+      }
+    },
+    validateSession() {
+      return this.isAuthenticated;
+    },
+    restoreSession() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        this.token = token;
+      }
+    },
+    logout() {
+      this.user = null;
+      this.token = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.setItem('favorites', JSON.stringify([])); 
+      localStorage.removeItem('cart');       
+      localStorage.removeItem('vendorProfile');
+      localStorage.removeItem('selectedVendor');
+    },
+  },
+});

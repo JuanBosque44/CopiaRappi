@@ -1,0 +1,22 @@
+@JWT = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImVtYWlsIjoibWFyaWFAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwidmVuZG9yUHJvZmlsZUlkIjpudWxsLCJkcml2ZXJQcm9maWxlSWQiOm51bGwsImJhY2tPZmZpY2VQcm9maWxlSWQiOm51bGwsImlhdCI6MTc2NjE1ODUzMiwiZXhwIjoxNzY2NTE0OTMyfQ.jhw3AhPa09QrEeFxksZEP7BGgbfHFEdVB_jODfH3jQM
+###
+POST http://localhost:3000/reviews 
+Content-Type: application/json
+Authorization: Bearer {{JWT}}
+
+{
+  "vendorId": 8,
+  "rating": 3,
+  "comment": "Tienda mediopelo"
+}
+
+###
+
+GET http://localhost:3000/reviews/3
+Authorization: Bearer {{JWT}}
+
+
+###
+
+DELETE http://localhost:3000/reviews/3
+Authorization: Bearer {{JWT}}
