@@ -222,17 +222,27 @@ export class DriversService implements IServiceInterface<Driver, CreateDriverDto
   async getDriverOrders(id: number) {
     const driver = await this.findOne(id);
     if(!driver) throw new NotFoundException('No se ha encontrado el repartidor.')
+    
     const ordersDto = new DriverOrdersResponseDto();
-    const orderSummary = new OrderSummaryDto();
+    let orderSummary = new OrderSummaryDto();
     const allOrders = new Array<OrderSummaryDto>();
     driver.orders.forEach(order => {
+      orderSummary = new OrderSummaryDto();
       Object.assign(orderSummary, {
-        id: 0,
+        id: order.id,
         totalAmount: order.totalAmount,
         status: order.status,
         payments: order.payments,
-        items: order.items,
+        items: order.items.map(item => ({
+          id: item.id,
+          name: item.product ? item.product.name : 'Producto no disponible',
+          description: item.product ? item.product.description : 'Descripción no disponible',
+          quantity: item.quantity,
+        })),
+
         totalItems: order.items.length,
+        driverId: order.driverId ? order.driverId : null,
+        vendorId: order.vendorId ? order.vendorId : null,
       });
       allOrders.push(orderSummary);
     });

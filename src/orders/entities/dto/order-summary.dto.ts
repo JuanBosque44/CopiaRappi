@@ -23,4 +23,10 @@ export class OrderSummaryDto {
     @Expose()
     @Type(() => PaymentResponseDto)
     payments: PaymentResponseDto[];
+
+    @Expose()
+    driverId?: number;
+
+    @Expose()
+    vendorId?: number;
 }

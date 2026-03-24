@@ -11,6 +11,8 @@
            required: false
        },
     });
+
+    const emits = defineEmits(['acceptOrder']);
     
     const fechaModif = computed(() => {
         if (!props.fecha) return null;
@@ -35,6 +37,7 @@
                     </li>
                 </ul>
             </span>
+            <button v-if="!order.driverId" @click="$emit('acceptOrder', order)">Aceptar envío</button>
         </li>
     </ul>
 </template>

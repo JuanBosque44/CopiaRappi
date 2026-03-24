@@ -6,4 +6,7 @@ export class UpdateOrderDto extends PartialType(CreateOrdersDto) {
     @IsOptional()
     @IsEnum(OrderStatus)
     status?: OrderStatus;
+
+    @IsOptional()
+    driverId?: number;
 }

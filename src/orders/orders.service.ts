@@ -17,6 +17,7 @@ import { PaginatedResult } from 'src/shared/interfaces/paginatedResult.type';
 import { paginate } from 'src/shared/utils/pagination';
 import { Product } from 'src/products/entities/products/products.entity';
 import { ProductRequestDto } from 'src/products/entities/dto/product-request.dto';
+import { FilterOrderDto } from './entities/dto/filter-order.dto';
 
 @Injectable()
 export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, UpdateOrderDto> {
@@ -34,18 +35,30 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
 
     /**
    * @param options Opciones de paginado
-   * @param vendorId Id para filtrar las órdenes pertenecientes al vendor recibido
+   * @param dtoFilter Filtro para las órdenes
    * @returns Listado de órdenes (con o sin paginación/filtro en base a las opciones recibidas)
    */
-    findAll(options: {page?: number; limit?: number; [key: string]: any, vendorId?: number} = {} ): Promise<Order[] | PaginatedResult<Order>> {
-        const relations = ['user']
-        const vendorId = options.vendorId || undefined;
-
-        console.log(vendorId)
-        if(options.limit && options.page) return paginate(this.orderRepository, options.page, options.limit, {relations}, vendorId ? { items: { product: { vendor: { id: vendorId } } } } : {})
+    findAll(options: {page?: number; limit?: number; [key: string]: any, dtoFilter?: FilterOrderDto} = {} ): Promise<Order[] | PaginatedResult<Order>> {
+        const relations = ['items', 'items.product', 'payments', 'payments.method', 'payments.user'];
         
+
+        if(options.limit && options.page) return paginate(this.orderRepository, options.page, options.limit, {relations}, options.dtoFilter ? { ...options.dtoFilter } : {});
+        
+        let whereOptions = {};
+        if(options.dtoFilter) {
+            const { vendorId, driverId, status } = options.dtoFilter;
+            if(vendorId) whereOptions = { ...whereOptions, vendorId };
+            if(driverId) whereOptions = { ...whereOptions, driverId };
+            if(status) whereOptions = { ...whereOptions, status };
+            if(!whereOptions && options.dtoFilter) whereOptions = { ...whereOptions, ...options.dtoFilter };
+        }
+
+        console.log('Where options:', this.orderRepository.find({
+            where: { ...whereOptions },
+            relations
+        })) 
         return this.orderRepository.find({
-            where: { vendorId },
+            where: { ...whereOptions },
             relations
         });
     }
@@ -55,6 +68,11 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
             where: { id: id },
             relations: ['user'],
         }) || Promise.reject('Orden no encontrada');
+    }
+
+    findAvailableOrders(page: number = 1): Promise<PaginatedResult<Order>> {
+        const options = { page, limit: 10 };
+        return paginate(this.orderRepository, options.page, options.limit, { relations: ['user'] }, { status: OrderStatus.PENDING, driver: null });
     }
 
 
@@ -110,7 +128,7 @@ export class OrdersService implements IServiceInterface<Order, CreateOrdersDto, 
         return saved;
     }
     
-
+    //actualiza el estado de la orden y asigna un driver (si se proporciona driverId) aunque elimina el id original y al buscar en el filtro lo hace mal
     update(id: number, body: UpdateOrderDto) : Promise<any> {
         return this.orderRepository.update(id, body);
     }

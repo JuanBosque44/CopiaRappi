@@ -46,7 +46,7 @@ export class DriversController {
             throw new InternalServerErrorException('No puedes ver los pedidos de este repartidor')
         }
         const driverOrders = await this.driverService.getDriverOrders(+id);
-        return driverOrders? driverOrders : 'No se han encontrado pedidos para este repartidor.'
+        return driverOrders.totalOrders === 0 ? 'No se han encontrado pedidos para este repartidor.' : driverOrders;
     }
        
     @Delete(':id')
