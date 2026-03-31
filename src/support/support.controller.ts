@@ -21,8 +21,8 @@ export class SupportController {
   @Get('requests')
   @Roles(UserRole.ADMIN)
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const options: any = {};
     if(!validateParameters(page, limit)) throw new InternalServerErrorException('Parametros inválidos')
+    const options: any = {};
 		if (page) options.page = Number(page);
 		if (limit) options.limit = Number(limit);
     return this.supportService.findAll(Object.keys(options).length ? options : {});

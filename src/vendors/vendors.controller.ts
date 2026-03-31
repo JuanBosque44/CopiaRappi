@@ -54,6 +54,7 @@ export class VendorsController {
   @Get(':id/products')
   @Public()
   getVendorProducts(@Param('id') id: string) {
+    if(!validateParameters(id)) throw new InternalServerErrorException('Parametros inválidos')
     return this.vendorsService.getProducts(+id);
   }
 
@@ -62,6 +63,7 @@ export class VendorsController {
   @Get(':id/statistics')
   @Public()
   getVendorStatistics(@Param('id') id: string) {
+    if(!validateParameters(id)) throw new InternalServerErrorException('Parametros inválidos')
     return this.vendorsService.getStatistics(+id);
   }
 }

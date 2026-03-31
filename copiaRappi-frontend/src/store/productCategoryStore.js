@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import { useUserStore } from './userStore.js';
 
 export const usePCategoryStore = defineStore('productCategory', {
     state: () => ({
@@ -26,5 +27,45 @@ export const usePCategoryStore = defineStore('productCategory', {
                 this.isLoading = false;
             }
         },
+
+        async createCategory(categoryData) {
+            console.log('Creating category with data:', categoryData);
+            const userStore = useUserStore();
+            
+            if (!categoryData.name) {
+                this.error = 'Category name is required';
+                return;
+            }
+            try {
+                const response = await axios.post('http://localhost:3000/products/category', { name: categoryData.name }, {
+                    headers: {
+                        Authorization: `Bearer ${userStore.token}`
+                    },
+                });
+                this.categories.push(response.data);
+                sessionStorage.setItem('productCategories', JSON.stringify(this.categories));
+                return this.categories;
+            } catch (error) {
+                this.error = error.message || 'Error creating product category';
+            }
+        },
+
+
+        async deleteCategory(id) {
+            const userStore = useUserStore();
+            
+            try {
+                await axios.delete(`http://localhost:3000/products/category/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${userStore.token}`
+                    }
+                });
+                this.categories = this.categories.filter(category => category.id !== id);
+                sessionStorage.setItem('productCategories', JSON.stringify(this.categories));
+            } catch (error) {
+                this.error = error.message || 'Error deleting product category';
+            }
+        }
+
     },
 });

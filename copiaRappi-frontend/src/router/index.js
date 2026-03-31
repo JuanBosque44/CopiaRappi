@@ -24,6 +24,12 @@ const routes = [
     component: AdminView,
     meta: { requiresAuth: true, roles: ['ADMIN'] },
   },
+  {
+    path: '/admin/categories',
+    name: 'admin-categories',
+    component: () => import('../views/Admins/AdminCategoriesView.vue'),
+    meta: { requiresAuth: true, roles: ['ADMIN'] },
+  },
 
   //Rutas de user
   {

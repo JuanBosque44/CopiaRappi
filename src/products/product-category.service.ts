@@ -48,12 +48,21 @@ export class ProductsCategoryService implements IServiceInterface<Category, Crea
     async update(id: number, data: UpdateCategoryDto): Promise<any> {
         data.name = data.name?.toLowerCase().trim();
 
+        const category = await this.findOne(id);
+		if (!category) {
+			throw new InternalServerErrorException('Categoría no encontrada o válida');
+		}
+
         const existing = await this.categoryRepository.findOne({where:{name: data.name}})
         if (existing) throw new InternalServerErrorException('Ya existe esta categoría')
         return this.categoryRepository.update(id, data);
     }
 
-    delete(id: number): Promise<any> {
+    async delete(id: number): Promise<any> {
+        const category = await this.findOne(id);
+		if (!category) {
+			throw new InternalServerErrorException('Categoría no encontrada o válida');
+		}
         return this.categoryRepository.delete(id);
     }
 }

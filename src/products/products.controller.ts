@@ -74,7 +74,7 @@ export class ProductsController {
 	}
 
 	@Post('category')
-	@Roles(UserRole.VENDOR, UserRole.ADMIN)
+	@Roles(UserRole.ADMIN)
 	createCategory(@Body() createCategoryDto: CreateCategoryDto) {
 		return this.productsCategoryService.create(createCategoryDto);
 	}
@@ -85,13 +85,8 @@ export class ProductsController {
 		if (!validateParameters(id)) {
 			throw new InternalServerErrorException('Parámetros inválidos');
 		}
-
-		const product = await this.productsService.findOne(+id);
-		if (!product || product.vendor.id !== req.user.vendorProfileId) {
-			throw new InternalServerErrorException('Producto no encontrado o registrado como propio');
-		}
-
-		return this.productsService.update(+id, updateProductDto);
+		//comprobar que el producto exista y que el vendedor registrado sea el mismo que intenta actualizarlo
+		return this.productsService.update(+id, updateProductDto, req.user.vendorProfileId);
 	}
 
 	@Patch('category/:id')
@@ -100,10 +95,7 @@ export class ProductsController {
 		if (!validateParameters(id)) {
 			throw new InternalServerErrorException('Parámetros inválidos');
 		}
-		const category = await this.productsCategoryService.findOne(+id);
-		if (!category) {
-			throw new InternalServerErrorException('Categoría no encontrada o válida');
-		}
+
 		return this.productsCategoryService.update(+id, updateCategoryDto);
 	}
 
@@ -113,11 +105,7 @@ export class ProductsController {
 		if (!validateParameters(id)) {
 			throw new InternalServerErrorException('Parámetros inválidos');
 		}
-		const product = await this.productsService.findOne(+id);
-		if (!product || product.vendor.id !== req.user.vendorProfileId) {
-			throw new InternalServerErrorException('Producto no encontrado o registrado como propio');
-		}
-		return this.productsService.delete(+id);
+		return this.productsService.delete(+id, req.user.vendorProfileId);
 	}
 
 	@Delete('category/:id')
@@ -125,10 +113,6 @@ export class ProductsController {
 	async deleteCategory(@Param('id') id: string) {
 		if (!validateParameters(id)) {
 			throw new InternalServerErrorException('Parámetros inválidos');
-		}
-		const category = await this.productsCategoryService.findOne(+id);
-		if (!category) {
-			throw new InternalServerErrorException('Categoría no encontrada o válida');
 		}
 		return this.productsCategoryService.delete(+id);
 	}

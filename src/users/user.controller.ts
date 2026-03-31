@@ -89,7 +89,6 @@ export class UserController {
     @Roles(UserRole.CLIENT)
     async getVendorByName(@Param('nombre') nombre: string) {
         if(!nombre) throw new InternalServerErrorException('No se ha ingresado un formato de nombre válido')
-        nombre = nombre.trim()
         const vendor =  await this.vendorService.findByVendorName(nombre);
         return vendor? vendor : 'No se han encontrado vendedores con el nombre'+ nombre
     }

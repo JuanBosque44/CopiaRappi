@@ -87,13 +87,15 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
       }
   }
 
-  async update(id: number, dto: UpdateVendorDto): Promise<Vendor> {
+  async update(id: number, dto: UpdateVendorDto): Promise<Vendor | VendorResponseDto> {
     const vendor = await this.findOne(id);
     if (!vendor) {
       throw new NotFoundException(`Vendedor con id ${id} no encontrado`);
     }
     Object.assign(vendor, dto);
-    return this.vendorsRepository.save(vendor);
+    let updatedVendor = await this.vendorsRepository.save(vendor);
+    
+    return plainToInstance(VendorResponseDto, updatedVendor, { excludeExtraneousValues: true });
   }
 
   async delete(id: number): Promise<void> {
@@ -107,6 +109,7 @@ export class VendorsService implements IServiceInterface <Vendor, CreateVendorDt
    * @returns el restaurante que tiene el nombre recibido o null en caso de no coincidir.
    */
   async findByVendorName(nombre: string): Promise<Vendor[]> {
+    nombre = nombre.trim();
     return this.vendorsRepository
       .createQueryBuilder('vendor')
       .where('vendor.shopName = :nombre', { nombre })

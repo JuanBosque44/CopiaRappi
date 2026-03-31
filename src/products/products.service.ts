@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { IServiceInterface } from 'src/shared/interfaces/service.interface';
 import { Product } from './entities/products/products.entity';
 import { CreateProductDto } from './entities/dto/create-product.dto';
@@ -70,24 +70,29 @@ export class ProductsService implements IServiceInterface<Product, CreateProduct
         return plainToInstance(ProductRequestDto, product, {excludeExtraneousValues:true})
     }
 
-	async update(id: number, data: UpdateProductDto): Promise<Product> {
+	async update(id: number, data: UpdateProductDto, vendorId?: number): Promise<Product> {
 		const product = await this.productRepository.findOne({ where: { id }, relations: ['category', 'vendor'] });
-		if (!product) throw new NotFoundException('Producto no encontrado');
+		if (!product || product.vendor.id !== vendorId) {
+			throw new NotFoundException('Producto no encontrado o registrado como propio');
+		}
 
-		// Actualiza categoría si se envía categoryId
 		if (data.categoryId) {
 			const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
 			if (!category) throw new NotFoundException('Categoría no encontrada');
 			product.category = category;
 		}
 
-		delete data.vendorId; // nunca permitimos cambiar el vendor
+		delete data.vendorId; 
 		Object.assign(product, data);
 
 		return this.productRepository.save(product);
 	}
 
-	async delete(id: number): Promise<void> {
+	async delete(id: number, vendorId?: number): Promise<void> {
+		const product = await this.findOne(+id);
+		if (!product || product.vendor.id !== vendorId) {
+			throw new InternalServerErrorException('Producto no encontrado o registrado como propio');
+		}
 		await this.productRepository.delete(id);
 	}
 }
