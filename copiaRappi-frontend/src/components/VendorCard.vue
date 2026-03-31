@@ -2,9 +2,12 @@
 import { computed, defineProps, onMounted, ref } from 'vue';
 import { useUserStore } from '../store/userStore.js';
 import { useFavoriteStore } from '../store/favoriteStore.js';
+import { useAuthError } from '../composables/useAuthError.js';
 
 const userStore = useUserStore();
 const favoriteStore = useFavoriteStore();
+const { captureError } = useAuthError();
+
 let { vendor } = 
 defineProps({
     vendor: {
@@ -23,10 +26,16 @@ const averageRating = ref('')
 let classFavorite = ref('')
 
 onMounted(() => {
-    averageCalculated()
-    const isFavorite = computed(() => favoriteStore.isVendorFavorite(vendor.id)).value;
-    if(!isFavorite) classFavorite.value = 'fav'
-    else classFavorite.value = 'fav-added'
+    try {
+        averageCalculated()
+        const isFavorite = computed(() => favoriteStore.isVendorFavorite(vendor.id)).value;
+        if(!isFavorite) classFavorite.value = 'fav'
+        else classFavorite.value = 'fav-added'
+    } catch (err) {
+        console.error('Error al cargar el vendor:', err);
+        captureError(err);
+    }
+
 });
 
 

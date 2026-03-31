@@ -99,10 +99,12 @@
 import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../../store/userStore.js';
 import { useRouter } from 'vue-router';
+import { useAuthError } from '../../composables/useAuthError.js';
 import axios from 'axios';
 
 const router = useRouter();
 const userStore = useUserStore();
+const { captureError } = useAuthError();
 
 const user = computed(() => userStore.user);
 
@@ -208,6 +210,7 @@ const loadOrders = async () => {
     }
   } catch (err) {
     console.error('Error al cargar órdenes:', err);
+    captureError(err);
     ordersError.value = err.response?.data?.message || 'No se pudieron cargar las órdenes';
   } finally {
     isLoading.value = false;

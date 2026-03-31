@@ -3,10 +3,12 @@ import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../store/userStore.js';
 import { usePaymentStore } from '../store/paymentStore.js';
 import { useRouter } from 'vue-router';
+import { useAuthError } from '../composables/useAuthError.js';
 
 const router = useRouter();
 const userStore = useUserStore();
 const paymentStore = usePaymentStore();
+const { captureError } = useAuthError();
 
 const isLoading = ref(false);
 const activeTab = ref('all');
@@ -88,8 +90,13 @@ const handleRetryPayment = async (payment) => {
 };
 
 onMounted(() => {
-  if (userStore.isAuthenticated) {
-    fetchPayments();
+  try {
+    if (userStore.isAuthenticated) {
+      fetchPayments();
+    }
+  } catch (error) {
+    console.error('Error fetching payments:', error);
+    captureError(error);
   }
 });
 </script>

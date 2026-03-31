@@ -38,12 +38,13 @@ import AdminLayoutView from '../../layouts/AdminLayoutView.vue';
 import { ref, onMounted } from 'vue';
 import { usePCategoryStore } from '../../store/productCategoryStore.js';
 import { useSupportStore } from '../../store/supportStore.js';
+import { useAuthError } from '../../composables/useAuthError.js';
 
 const categoryStore = usePCategoryStore();
 const categories = ref([]);
 const supportCategoryStore = useSupportStore();
 const supportCategories = ref([]);
-const authStore = useAuthStore();
+const { captureError } = useAuthError();
 
 onMounted(async () => {
     try{
@@ -52,6 +53,7 @@ onMounted(async () => {
     }
     catch(err){
         console.error('Error al cargar categorías:', err);
+        captureError(err);
     }
 });
 
@@ -110,7 +112,7 @@ function deleteSupportCategory(id) {
     }
 
     .button {
-        background-color: #ff4d4d;
+        background-color: #42b883;
         color: white;
         border: none;
         padding: 5px 10px;

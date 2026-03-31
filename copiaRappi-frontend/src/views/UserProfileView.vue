@@ -55,6 +55,7 @@ import { useUserStore } from '../store/userStore.js';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useFavoriteStore } from '../store/favoriteStore';
+import { useAuthError } from '../composables/useAuthError.js';
 import DriverForm from '../components/DriverForm.vue';
 import AdminLayoutView from '../layouts/AdminLayoutView.vue';
 import DriverLayoutView from '../layouts/DriverLayoutView.vue';
@@ -63,6 +64,7 @@ import ClientLayoutView from '../layouts/ClientLayoutView.vue';
 const userStore = useUserStore();
 const router = useRouter();
 const favoriteStore = useFavoriteStore();
+const { error, captureError } = useAuthError();
 
 const user = computed(() => userStore.user);
 const name = ref(user.value?.name || '');
@@ -95,6 +97,7 @@ onMounted(async () => {
       await fetchFavoriteVendors();
     } catch (err) {
       console.error('Error al cargar favoritos:', err);
+      captureError(err);
     }
   }
 
@@ -128,6 +131,7 @@ const updateProfile = async () => {
     profileMessage.value = '¡Perfil actualizado correctamente!';
   } catch (err) {
     console.error('Error al actualizar perfil:', err);
+    captureError(err);
     profileMessage.value = 'No se pudo actualizar el perfil';
     profileError.value = true;
   } finally {
@@ -142,6 +146,7 @@ const changeAvailability = async () => {
     profileMessage.value = 'Disponibilidad actualizada correctamente: ' + (available.value ? 'Disponible' : 'No Disponible');
   } catch (err) {
     console.error('Error al cambiar disponibilidad:', err);
+    captureError(err);
     alert('No se pudo cambiar la disponibilidad');
     available.value = !available.value; // Revertir el cambio en caso de error
   }
@@ -160,6 +165,7 @@ const getAvailable = async () => {
     driverLicense.value = res.data.driverLicense || '';
   } catch (err) {
     console.error('Error al obtener disponibilidad:', err);
+    captureError(err);
   }
 };
 
@@ -206,6 +212,8 @@ const logout = () => {
   userStore.logout();
   router.replace('/login');
 };
+
+
 </script>
 
 <style scoped>

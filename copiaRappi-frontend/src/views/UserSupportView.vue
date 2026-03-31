@@ -6,9 +6,11 @@
     import VendorLayoutView from '../layouts/VendorLayoutView.vue';
     import DriverLayoutView from '../layouts/DriverLayoutView.vue';
     import { TransformReasons } from '../composables/useReason.js';
+    import { useAuthError } from '../composables/useAuthError.js';
 
     const supportStore = useSupportStore();
     const userStore = useUserStore();
+    const { captureError } = useAuthError();
 
     const user = ref(userStore.user);
     const message = ref('');
@@ -45,6 +47,7 @@
         } catch (err) {
             console.error('Error al cargar las razones de soporte:', err);
             error.value = 'No se pudieron cargar las razones de soporte';
+            captureError(err);
         }
     });
 
