@@ -2,20 +2,17 @@
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '../../store/userStore.js';
-import { usePaymentStore } from '../../store/paymentStore.js';
 import axios from 'axios';
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
-const paymentStore = usePaymentStore();
 
 const isLoading = ref(false);
 const orderData = ref(null);
 const showPaymentForm = ref(false);
 const isExistingOrder = ref(false);
 
-// Obtener datos de la orden de sessionStorage, route params o API
 const initializeOrder = async () => {
   const storedOrder = sessionStorage.getItem('pendingOrder');
   if (storedOrder) {

@@ -58,9 +58,11 @@ import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import VendorCard from '../../components/VendorCard.vue';
 import { useFavoriteStore } from '../../store/favoriteStore.js';
+import { useAuthError } from '../../composables/useAuthError.js';
 
 const userStore = useUserStore();
 const favoriteStore = useFavoriteStore();
+const { captureError } = useAuthError();
 const orders = ref([]);
 const error = ref('');
 const loading = ref(false);
@@ -68,6 +70,7 @@ const searchQuery = ref('');
 const searchResults = ref([]);
 const selectedRestaurant = ref(null);
 const cart = ref([]);
+
 const cartTotal = computed(() => {
   return cart.value.reduce((total, item) => total + (item.quantity * item.price), 0);
 });
@@ -75,7 +78,6 @@ const cartTotal = computed(() => {
 const user = computed(() => userStore.user);
 const favorite = ref([]);
 
-// Función para buscar restaurantes
 const searchRestaurants = async () => {
   if (!searchQuery.value) {
     fetchRestaurants();
@@ -121,12 +123,11 @@ const getFavoriteVendors = async () => {
     try {
         if (localStorage.getItem('favorites')) {
           favoriteStore.favoriteVendors = JSON.parse(localStorage.getItem('favorites'));
-          console.log('Favorite vendors loaded from localStorage');
+          console.log('Vendedores favoritos cargados desde localStorage');
           favorite.value = favoriteStore.favoriteVendors;
         }
         else {
           favoriteStore.favoriteVendors = await favoriteStore.fetchFavoriteVendors(client.id, userStore.token);
-          console.log('Favorite vendors loaded from store');
           favorite.value = favoriteStore.favoriteVendors;
         }
         return favorite.value;
@@ -139,7 +140,6 @@ const getFavoriteVendors = async () => {
 
 
 
-// Función para proceder con la compra
 const checkout = async () => {
   if (cart.value.length === 0) {
     error.value = 'El carrito está vacío.';
@@ -166,7 +166,14 @@ const checkout = async () => {
 
 
 onMounted(() => {
-  fetchRestaurants();
+  try{
+    fetchRestaurants();
+  }
+  catch (err) {
+    console.error('Error al cargar restaurantes:', err);
+    error.value = 'No se pudieron cargar los restaurantes. Intenta nuevamente.';
+    captureError(err);
+  }
 });
 </script>
 

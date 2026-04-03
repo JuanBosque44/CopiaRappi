@@ -22,8 +22,10 @@ import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../../store/userStore.js';
 import OrderCard from '../../components/OrderCard.vue';
 import { useOrders } from '../../composables/useOrders.js';
+import { useAuthError } from '../../composables/useAuthError.js';
 
 const { fetchOrdersByDriver, info, orders } = useOrders();
+const { captureError } = useAuthError();
 
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
@@ -31,10 +33,16 @@ const totalValue = ref(0);
 let fecha = ref(Date)
 
 onMounted(async () => {
-  if(orders.lenght === 0)
-  await fetchOrdersByDriver(user.value.driverProfileId);
-  fecha.value = info.value?.date;
-  totalValue.value = orders.value.reduce((acc, order) => acc + order.totalAmount, 0);
+    try {
+        if(orders.lenght === 0)
+        await fetchOrdersByDriver(user.value.driverProfileId);
+        fecha.value = info.value?.date;
+        totalValue.value = orders.value.reduce((acc, order) => acc + order.totalAmount, 0);
+    }
+    catch (err) {
+        console.error('Error al cargar órdenes:', err);
+        captureError(err);
+    }
 });
 
 </script>

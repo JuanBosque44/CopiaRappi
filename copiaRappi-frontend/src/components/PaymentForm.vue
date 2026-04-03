@@ -84,7 +84,6 @@ const isDigitalWalletValid = computed(() => {
 
 const isFormValid = computed(() => isCardFormValid.value && isDigitalWalletValid.value);
 
-// Formatear número de tarjeta
 const formatCardNumber = (value) => {
   return value
     .replace(/\s/g, '')
@@ -111,7 +110,6 @@ const handleCVVInput = (e) => {
   cardData.value.cvv = e.target.value.replace(/\D/g, '').slice(0, 3);
 };
 
-// Procesar pago
 const handlePayment = async () => {
   if (!isFormValid.value) {
     emit('payment-error', 'Por favor completa todos los campos correctamente');

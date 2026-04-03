@@ -4,7 +4,6 @@
     
     <VendorLayoutView />
 
-    <!-- PERFIL DEL NEGOCIO -->
     <section>
       <h3> Perfil del negocio</h3>
       <form @submit.prevent="updateVendorProfile">
@@ -22,8 +21,10 @@ import { reactive, onMounted } from 'vue';
 import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import VendorLayoutView from '../../layouts/VendorLayoutView.vue';
+import { useAuthError } from '../../composables/useAuthError.js';
 
 const userStore = useUserStore();
+const { captureError } = useAuthError();
 const vendor = reactive({
   id: userStore.user.vendorProfileId,
   shopName: '',
@@ -34,7 +35,6 @@ const vendor = reactive({
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${userStore.token}` } });
 
 
-// --- Perfil ---
 const updateVendorProfile = async () => {
   try {
     const { data } = await axios.patch(`http://localhost:3000/vendors/${vendor.id}`, vendor, authHeaders());
@@ -60,7 +60,12 @@ const getVendorProfile = async () => {
 };
 
 onMounted(async () => {
-  getVendorProfile();
+    try {
+      await getVendorProfile();
+    } catch (err) {
+      console.error('Error al cargar perfil del proveedor:', err);
+      captureError(err);
+    }
 });
 </script>
 

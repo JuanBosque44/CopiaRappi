@@ -22,14 +22,15 @@ import { ref, onMounted } from 'vue';
 import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import VendorLayoutView from '../../layouts/VendorLayoutView.vue';
+import { useAuthError } from '../../composables/useAuthError.js';
 
 const userStore = useUserStore();
+const { captureError } = useAuthError();
 
 const stats = ref(null);
 
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${userStore.token}` } });
 
-// --- Estadísticas ---
 const fetchStats = async () => {
   try {
     const { data } = await axios.get(`http://localhost:3000/vendors/${userStore.user.vendorProfileId}/statistics`, authHeaders());
@@ -46,7 +47,13 @@ const fetchStats = async () => {
 };
 
 onMounted(async () => {
-  fetchStats();
+    try {
+      await fetchStats();
+    }
+    catch (err) {
+      console.error('Error al cargar estadísticas:', err);
+      captureError(err);
+    }
 });
 
 </script>

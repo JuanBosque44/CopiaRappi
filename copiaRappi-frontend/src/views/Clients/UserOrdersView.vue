@@ -86,7 +86,6 @@
     </div>
   </div>
 
-  <!-- Botón volver -->
   <div class="footer-actions">
     <button @click="returnToProfile" class="btn-back">
       ← Volver al Perfil
@@ -253,7 +252,6 @@ onMounted(() => {
   font-size: 16px;
 }
 
-/* Estados de carga y error */
 .loading-state,
 .empty-state,
 .error-message {
@@ -306,7 +304,6 @@ onMounted(() => {
   margin: 0 0 12px 0;
 }
 
-/* Grid de órdenes */
 .orders-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -444,7 +441,6 @@ onMounted(() => {
   color: #721c24;
 }
 
-/* Acciones */
 .order-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -510,7 +506,6 @@ onMounted(() => {
 
 }
 
-/* Footer */
 .footer-actions {
   text-align: center;
   padding-top: 20px;

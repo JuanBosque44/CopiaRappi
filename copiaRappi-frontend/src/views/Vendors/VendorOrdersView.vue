@@ -3,7 +3,6 @@
     <h2>Pedidos</h2>
     <VendorLayoutView></VendorLayoutView>
 
-    <!-- PEDIDOS -->
     <section>
         <h3>Historial</h3>
         <div v-if="loadingOrders">Cargando pedidos...</div>
@@ -23,7 +22,6 @@
     </section>
 
 
-    <!-- DETALLES DEL PEDIDO -->
     <section v-if="selectedOrder">
       <h3>Detalles del Pedido #{{ selectedOrder.id }}</h3>
       <ul>
@@ -42,7 +40,9 @@ import { ref, onMounted } from 'vue';
 import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import VendorLayoutView from '../../layouts/VendorLayoutView.vue';
+import { useAuthError } from '../../composables/useAuthError.js';
 
+const { captureError } = useAuthError();
 const userStore = useUserStore();
 const orders = ref([]);
 const selectedOrder = ref(null);
@@ -91,7 +91,12 @@ const changeOrderStatus = async (id, status) => {
 };
 
 onMounted(() => {
-  fetchOrders();
+  try {
+    fetchOrders();
+  } catch (err) {
+    console.error('Error al cargar pedidos:', err);
+    captureError(err);
+  }
 });
 
 </script>

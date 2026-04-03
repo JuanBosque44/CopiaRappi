@@ -27,7 +27,9 @@ import { useUserStore } from '../../store/userStore.js';
 import DriverLayoutView from '../../layouts/DriverLayoutView.vue';
 import OrderCard from '../../components/OrderCard.vue';
 import { useOrders } from '../../composables/useOrders.js';
+import { useAuthError } from '../../composables/useAuthError.js';
 
+const { captureError } = useAuthError();
 const { fetchOrdersByDriver, orders, availableOrders, fetchAvailableOrders, acceptOrderApi } = useOrders();
 
 const userStore = useUserStore();
@@ -116,8 +118,14 @@ const prevPage = () => {
 };
 
 onMounted(() => {
-  fetchOrders(); 
-  fetchAvailable();
+  try {
+    fetchOrders(); 
+    fetchAvailable();
+  }
+  catch (err) {
+    console.error('Error al cargar órdenes:', err);
+    captureError(err);
+  }
 });
 </script>
 

@@ -21,7 +21,7 @@ export const useSupportStore = defineStore('support', {
                 }
                 return this.reasons;
             } catch (error) {
-                this.error = error.message || 'Error fetching support reasons';
+                this.error = error.message || 'Error al obtener las razones de soporte';
             } finally {
                 this.isLoading = false;
             }

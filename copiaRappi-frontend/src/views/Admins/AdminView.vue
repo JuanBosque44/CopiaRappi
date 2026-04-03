@@ -55,8 +55,10 @@ import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import AdminLayoutView from '/src/layouts/AdminLayoutView.vue';
 import { TransformReasons } from '../../composables/useReason.js';
+import { useAuthError } from '../../composables/useAuthError.js';
 
 const userStore = useUserStore();
+const { captureError } = useAuthError();
 const users = ref([]);
 let page = ref(1);
 let totalPages = ref(1);
@@ -148,8 +150,14 @@ const transformCategory = computed(() => {
 });
 
 onMounted(() => {
-  fetchUsers();
-  receiveMessages(0);
+  try {
+    fetchUsers();
+    receiveMessages(0);
+  }
+  catch (err) {
+    console.warn('⚠️ Error al cargar datos:' + err);
+    captureError(err);
+  }
 });
 </script>
 

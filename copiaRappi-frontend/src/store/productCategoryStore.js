@@ -22,7 +22,7 @@ export const usePCategoryStore = defineStore('productCategory', {
                 }
                 return this.categories;
             } catch (error) {
-                this.error = error.message || 'Error fetching product categories';
+                this.error = error.message || 'Error al obtener las categorías';
             } finally {
                 this.isLoading = false;
             }
@@ -33,7 +33,7 @@ export const usePCategoryStore = defineStore('productCategory', {
             const userStore = useUserStore();
             
             if (!categoryData.name) {
-                this.error = 'Category name is required';
+                this.error = 'El nombre de la categoría es requerido';
                 return;
             }
             try {
@@ -46,7 +46,7 @@ export const usePCategoryStore = defineStore('productCategory', {
                 sessionStorage.setItem('productCategories', JSON.stringify(this.categories));
                 return this.categories;
             } catch (error) {
-                this.error = error.message || 'Error creating product category';
+                this.error = error.message || 'Error al crear la categoría';
             }
         },
 
@@ -63,7 +63,7 @@ export const usePCategoryStore = defineStore('productCategory', {
                 this.categories = this.categories.filter(category => category.id !== id);
                 sessionStorage.setItem('productCategories', JSON.stringify(this.categories));
             } catch (error) {
-                this.error = error.message || 'Error deleting product category';
+                this.error = error.message || 'Error al eliminar la categoría';
             }
         }
 

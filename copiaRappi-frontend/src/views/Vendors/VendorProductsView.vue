@@ -50,9 +50,11 @@ import { useUserStore } from '../../store/userStore.js';
 import axios from 'axios';
 import { usePCategoryStore } from '../../store/productCategoryStore.js';
 import VendorLayoutView from '../../layouts/VendorLayoutView.vue';
+import { useAuthError } from '../../composables/useAuthError.js';
 
 const userStore = useUserStore();
 const pCategoryStore = usePCategoryStore();
+const { captureError } = useAuthError();
 
 /* =====================
    Estado
@@ -234,6 +236,7 @@ onMounted(async () => {
   }
   catch(err){
     console.error('Error al cargar datos del vendedor:', err);
+    captureError(err)
   }
 });
 </script>
